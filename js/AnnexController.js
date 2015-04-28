@@ -225,24 +225,46 @@ AnnexController.prototype.graphicsControls = function() {
 	// UNITS CONTROLS
 	var $unitsPanel = $panel.find(".content[data-section='units']");
 	var $unitPreviewCanvas = $unitsPanel.find("svg");
-	var unitPreview = new Unit("f", "inf", "tmc").draw($unitPreviewCanvas[0]);
+	var unitPreview = new Unit().draw($unitPreviewCanvas[0]);
 	// Add all of the options to the select fields
 	var identities = unitPreview.identities();
 	var $identity = $unitsPanel.find("select.identity");
 	$.each(identities, function(k, v) {
-		$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($identity);
+		if(k == "f") {
+			$("<option>").attr({
+				value: k,
+				selected: "selected"
+			}).text(v.title).data("type", v.type).appendTo($identity);
+		} else {
+			$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($identity);
+		}
 	});
 	// Set the icons
 	var icons = unitPreview.icons();
 	var $icon = $unitsPanel.find("select.icon");
 	$.each(icons, function(k, v) {
-		$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($icon);
+		if(k == "inf") {
+			$("<option>").attr({
+				value: k,
+				selected: "selected"
+			}).text(v.title).data("type", v.type).appendTo($icon);
+		} else {
+			$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($icon);
+		}
 	});
 	// Set the echelons
 	var echelons = unitPreview.echelons();
 	var $echelon = $unitsPanel.find("select.echelon");
 	$.each(echelons, function(k, v) {
-		$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($echelon);
+		if(k == "sqd") {
+			$("<option>").attr({
+				value: k,
+				selected: "selected"
+			}).text(v.title).data("type", v.type).appendTo($echelon);
+		} else {
+			$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($echelon);
+		}
+		
 	});
 	// Set reinforced/detached
 	var $refdet = $unitsPanel.find(".refdet");
@@ -261,15 +283,15 @@ AnnexController.prototype.graphicsControls = function() {
 	// Change the unit identification
 	$identity.change(function() {
 		unitPreview.identity($(this).val()).draw($unitPreviewCanvas[0]);
-	});
+	}).change();
 	// Change the unit icon
 	$icon.change(function() {
 		unitPreview.icon($(this).val()).draw($unitPreviewCanvas[0]);
-	});
+	}).change();
 	// Change the unit echelon
 	$echelon.change(function() {
 		unitPreview.echelon($(this).val()).draw($unitPreviewCanvas[0]);
-	});
+	}).change();
 	// Change reinforced/detached
 	$refdet.click(function() {
 		unitPreview.amplifier({1: $(this).val()}).draw($unitPreviewCanvas[0]);
@@ -307,7 +329,13 @@ AnnexController.prototype.graphicsControls = function() {
 		});
 		Controller.G.addSymbol(unitPreview); // TODO: unitPreview.copy()
 		// Create a new unit for the preview
-		unitPreview = new Unit("f", "inf", "tmc").draw($unitPreviewCanvas[0]);
+		unitPreview = new Unit($identity.val(), $icon.val(), $echelon.val()).draw($unitPreviewCanvas[0]);
+		// Reset the options
+		$refdet.val("");
+		$country.val("false");
+		$unitDesignation.val("");
+		$higherUnit.val("");
+		$comments.val("");
 		Controller.closeAnnexBuilderSection("graphics");
 	}));
 }

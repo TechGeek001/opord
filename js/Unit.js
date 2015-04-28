@@ -89,6 +89,12 @@ Unit.prototype.amplifier = function(a) {
 						/*
 						An accepted code that shows the country indicator.
 						*/
+						if(!s || s == "false") {
+							this.AMPLIFIERS[i] = null;
+						} else {
+							this.AMPLIFIERS[i] = s;
+						}
+						break;
 					case(3):
 						/*
 						A unique alphanumeric designation that identifies the unit being displayed.
@@ -444,14 +450,14 @@ Unit.prototype.draw = function(canvas, options) {
 				case("square"):
 					width = rectHeight;
 					height = rectHeight;
-					centerX = (width / 2) + squareWidthOffset;
+					centerX = width / 2;
 					iconFullWidth = width;
 					iconFullHeight = height;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					frameGroup.appendChild(drawRect(0, 0, width, height, o));
 					// Translate to make room for the echelon
-					frameGroup.setAttributeNS(null, "transform", "translate(" + squareWidthOffset + ", " + taskforceHeight + ")");
-					iconGroup.setAttributeNS(null, "transform", "translate(" + squareWidthOffset + ", " +  taskforceHeight + ")");
+					frameGroup.setAttributeNS(null, "transform", "translate(0, " + taskforceHeight + ")");
+					iconGroup.setAttributeNS(null, "transform", "translate(0, " +  taskforceHeight + ")");
 					break;
 				case("quatrefoil"):
 					width = rectHeight * hypotenuseConstant;
