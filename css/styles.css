@@ -1,0 +1,130 @@
+.page-header-inline {
+	margin-top: 20px;
+}
+
+#admin_info select[multiple] {
+	height: 440px;
+}
+
+#annex-builder {
+	position: fixed;
+	width: 1140px;
+	height: 80%;
+	margin-left: -570px;
+	left: 50%;
+	top: 10%;
+	border: 1px solid #CCC;
+	z-index: 999;
+	background-color: white;
+	box-shadow: 5px 5px 5px #000;
+	padding: 0 20px;
+	overflow-y: auto;
+	border-radius: 4px;
+}
+
+#annex-builder .close {
+	position: absolute;
+	right: 10px;
+	top: 5px;
+	z-index: 999;
+}
+
+#annex-builder-background {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 998;
+	background-color: rgba(0,0,0,.7);
+}
+
+#annex-builder #graphics-canvas-container {
+	position: absolute;
+	top: 40px;
+	border: 1px solid black;
+}
+
+#annex-builder .annex-part-menu {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+	width: 100%;
+	background-color: #DDD;
+	border-bottom: 1px solid #DDD;
+}
+
+#annex-builder .annex-part-section {
+	position: absolute;
+	top: 55px;
+	left: 50%;
+	z-index: 100;
+	background-color: #EEE;
+	width: 80%;
+	margin-left: -40%;
+	border-radius: 4px;
+	box-shadow: 5px 5px 5px #333;
+}
+
+#annex-builder .annex-part-section .inner {
+	padding: 10px;
+}
+
+#annex-builder .annex-part-section hr {
+	border-color: #CCC;
+	margin: 10px 0;
+}
+
+#annex-builder .annex-part-section .spaced {
+	margin-top: 10px;
+}
+
+#annex-builder .annex-part-section .checkbox, #annex-builder .annex-part-section .radio {
+	margin: 0;
+}
+
+#annex-builder .graphics-colors-container {
+	height: 22px;
+}
+
+#annex-builder .graphics-color-selected {
+	float: left;
+	margin-right: 4px;
+	height: 22px;
+	width: 22px;
+	border: 1px solid black;
+}
+
+#annex-builder .graphics-color-bar {
+	float: left;
+	margin-left: 1px;
+	height: 22px;
+	padding-top: 1px;
+	padding-left: 1px;
+	border: 1px solid black;
+}
+
+#annex-builder .graphics-color-bar>.item {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 1px;
+	border: 1px solid black;
+	cursor: pointer;
+}
+
+#annex-builder p.text-label {
+	margin: 0;
+	font-weight: bold;
+}
+
+img {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+h3, h4 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}

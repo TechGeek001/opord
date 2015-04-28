@@ -1,0 +1,108 @@
+<div class="references">
+	<div class="form-group">
+		<h3>References</h3>
+	</div>
+	<ol>
+		<li>OPORD 15-001 (Leader Blitz), 01JAN15 <a href="#" class="pull-right">Remove</a></li>
+		<li>MEMORANDUM Commander's Open Door Policy, 01JAN15 <a href="#" class="pull-right">Remove</a></li>
+		<li>MAP SHEET Fort Benning Military Installation 1:50,000, 01JAN15 <a href="#" class="pull-right">Remove</a></li>
+		<li>FM 3-21.8 <a href="#" class="pull-right">Remove</a></li>
+	</ol>
+	<hr>
+	<div class="row">
+		<div class="col-md-3">
+			<button class="btn btn-default btn-block"><span class="glyphicon glyphicon-plus"></span> Operations Order</button>
+		</div>
+		<div class="col-md-3">
+			<button class="btn btn-default btn-block"><span class="glyphicon glyphicon-plus"></span> Memorandum</button>
+		</div>
+		<div class="col-md-3">
+			<button class="btn btn-default btn-block"><span class="glyphicon glyphicon-plus"></span> Map Sheet</button>
+		</div>
+		<div class="col-md-3">
+			<button class="btn btn-default btn-block"><span class="glyphicon glyphicon-plus"></span> Custom</button>
+		</div>
+	</div>
+	<div class="reference_controls">
+		<div>
+			<h4>Reference an Order</h4>
+			<div class="row">
+				<div class="col-md-3">
+					<label>Type</label>
+					<select class="form-control" id="ref_op_type">
+						<option value="WARNO">WARNO</option>
+						<option value="OPORD">OPORD</option>
+						<option value="FRAGO">FRAGO</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label>Order Number</label>
+					<input type="text" class="form-control" id="ref_op_number" placeholder="15-001">
+				</div>
+				<div class="col-md-4">
+					<label>Operation Name</label>
+					<input type="text" class="form-control" id="ref_op_name" placeholder="Iron Saber">
+				</div>
+				<div class="col-md-3">
+					<label>Publication Date</label>
+					<input type="text" class="form-control" id="ref_op_date" placeholder="01JAN15">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3 col-md-offset-9">
+					<button class="btn btn-primary btn-block">Add Reference</button>
+				</div>
+			</div>
+		</div>
+		<div>
+			<h4>Reference a Memorandum</h4>
+			<div class="row">
+				<div class="col-md-9">
+					<label>Memorandum Title</label>
+					<input type="text" class="form-control" id="ref_memo_name" placeholder="Commander's Open Door Policy">
+				</div>
+				<div class="col-md-3">
+					<label>Publication Date</label>
+					<input type="text" class="form-control" id="ref_memo_date" placeholder="01JAN15">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3 col-md-offset-9">
+					<button class="btn btn-primary btn-block">Add Reference</button>
+				</div>
+			</div>
+		</div>
+		<div>
+			<h4>Reference a Map Sheet</h4>
+			<div class="row">
+				<div class="col-md-9">
+					<label>Map Sheet Title</label>
+					<input type="text" class="form-control" id="ref_map_name" placeholder="Fort Benning Military Installation, 1:50,000">
+				</div>
+				<div class="col-md-3">
+					<label>Publication Date</label>
+					<input type="text" class="form-control" id="ref_map_date" placeholder="01JAN15">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3 col-md-offset-9">
+					<button class="btn btn-primary btn-block">Add Reference</button>
+				</div>
+			</div>
+		</div>
+		<div>
+			<h4>Custom Reference</h4>
+			<div class="row">
+				<div class="col-md-12">
+					<label>Reference Information</label>
+					<input type="text" class="form-control" id="ref_custom_name" placeholder="Google Maps, FM 3-21.8">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-3 col-md-offset-9">
+					<button class="btn btn-primary btn-block">Add Reference</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

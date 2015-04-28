@@ -1,0 +1,53 @@
+#preview {
+	font-size: 10px;
+	color: black;
+	overflow-y: scroll;
+	max-height: 1px;
+	border-right: 15px solid white;
+}
+
+#preview p {
+	margin: 0;
+	line-height: 10px;
+}
+
+#preview ol {
+	padding-left: 15px;
+	margin-left: 0;
+	margin-bottom: 0;
+	list-style-type: decimal;
+}
+
+#preview ol ol {
+	margin-top: 10px;
+	list-style-type: lower-latin;
+}
+
+#preview ol ol li {
+	margin-top: 10px;
+}
+
+#preview ol ol ol {
+	margin-top: 10px;
+	list-style-type: lower-roman;
+}
+
+#preview ol ol ol ol {
+	list-style-type: decimal;
+}
+
+#preview table {
+	width: 100%;
+	font-size: 10px;
+	margin-bottom: 10px;
+	color: black;
+}
+
+#preview table td, #preview table th {
+	border: 1px solid black;
+	padding: 1px 2px;
+}
+
+#preview .bold {
+	font-weight: bold;
+}

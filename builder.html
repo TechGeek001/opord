@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>OPORD Builder 0.1</title>
+		<script type="text/javascript" src="js/jQuery1.9.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/GraphicsBuilder.js"></script>
+		<script type="text/javascript" src="js/Unit.js"></script>
+		<script type="text/javascript" src="js/AdminInfoController.js"></script>
+		<script type="text/javascript" src="js/AnnexController.js"></script>
+		<script type="text/javascript" src="js/opordBuilder.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/override.css">
+		<link rel="stylesheet" href="css/styles.css">
+		<link rel="stylesheet" href="css/preview.css">
+	</head>
+	<body>
+		<div class="container">
+			<div id="annex-builder-background">
+				<div id="annex-builder">
+					<button type="button" class="close main"><span aria-hidden="true">&times;</span></button>
+					<div class="annex-part" data-part="intro">
+						<h2>Annex Builder</h2>
+						<div class="form-group">
+							<label>Title</label>
+							<input type="text" class="form-control annex-title" placeholder="Timeline, Red Checkbook, Scheme of Maneuver Phase I">
+							<p class="help-block">Enter the title for the content you are creating. Annex titles and Appendix numbers will be added automatically</p>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-md-3">
+								<h3>Graphics</h3>
+								<img src="img/c2.jpg" class="img-responsive img-thumbnail">
+								<p>This option is generally for creating concept sketches and ops graphics. You will have the option of putting grid lines, unit icons, and other symbols over an image of your choosing.</p>
+							</div>
+							<div class="col-md-3">
+								<h3>Wire Diagram</h3>
+								<img src="img/b1.jpg" class="img-responsive img-thumbnail">
+								<p>This option is used for creating enemy disposition and composition/strength diagrams.</p>
+							</div>
+							<div class="col-md-3">
+								<h3>Table</h3>
+								<img src="img/c1.jpg" class="img-responsive img-thumbnail">
+								<p>This option is the most versitile, and is used to create simple timelines, the fires matrix (TTLODAC), and personnel rosters.</p>
+							</div>
+							<div class="col-md-3">
+								<h3>Miscellaneous</h3>
+								<img src="img/a2.jpg" class="img-responsive img-thumbnail">
+								<p>This option is meant for specific objects that don't fit into any of the other generic categories.</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-3">
+								<ul>
+									<li>Basic Graphics / Concept Sketch</li>
+									<li><a href="#" data-part="graphics">Ops Graphics / Terrain</a></li>
+								</ul>
+							</div>
+							<div class="col-md-3">
+								<ul>
+									<li>Enemy D/C/S</li>
+								</ul>
+							</div>
+							<div class="col-md-3">
+								<ul>
+									<li>Basic Table</li>
+									<li>Checkbook</li>
+									<li>Concept of the Operation (KDDTMK)</li>
+									<li>Fires Matrix (TTLODAC)</li>
+									<li>Personnel Roster (Basic)</li>
+									<li>Timeline (Basic)</li>
+								</ul>
+							</div>
+							<div class="col-md-3">
+								<ul>
+									<li>Personnel Roster (Advanced)</li>
+									<li>Timeline (Advanced)</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="annex-part" data-part="graphics">
+						<div class="annex-part-menu">
+							<button class="btn btn-default" data-section="imagery">Imagery</button>
+							<button class="btn btn-default" data-section="grid">Grid</button>
+							<button class="btn btn-default" data-section="units">Units / Equipment</button>
+							<button class="btn btn-default" data-section="tasks">Tasks</button>
+						</div>
+						<div class="annex-part-section">
+							<div class="inner">
+								<div class="content" data-section="grid">
+									<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+									<h3>Grid Lines</h3>
+									<p>Use this panel to add grid lines to your graphics</p>
+									<hr>
+									<div class="row">
+										<div class="col-md-8">
+											<h4>Create Grid Lines</h4>
+											<div class="form-group">
+												<div class="g1">
+													<label><input type="radio" name="grid-type" class="grid-type" value="1" checked="checked"> Build From Adjacent Grid Lines</label>
+													<div class="row">
+														<div class="col-md-12">
+															<input type="text" class="form-control" placeholder="four or six digit grid">
+														</div>
+													</div>
+												</div>
+												<div class="g2">
+													<label><input type="radio" name="grid-type" class="grid-type" value="2"> Build From Two Known Points</label>
+													<div class="row">
+														<div class="col-md-6">
+															<input type="text" class="form-control" placeholder="eight digit grid">
+														</div>
+														<div class="col-md-6">
+															<input type="text" class="form-control" placeholder="eight digit grid">
+														</div>
+													</div>
+												</div>
+												<div class="g3">
+													<label><input type="radio" name="grid-type" class="grid-type" value="3"> Build From a Known Point and Distance</label>
+													<div class="row">
+														<div class="col-md-6">
+															<input type="text" class="form-control" placeholder="eight digit grid">
+														</div>
+														<div class="col-md-2">
+															<input type="text" class="form-control" placeholder="dist.">
+														</div>
+														<div class="col-md-4">
+															<select class="form-control distance-unit">
+																<option value="m">m (meters)</option>
+																<option value="km">km (kilometers)</option>
+																<option value="ft">ft (feet)</option>
+																<option value="yd">yd (yards)</option>
+																<option value="mi">mi (miles)</option>
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<h4>Options</h4>
+											<p class="text-label">Grid Accuracy</p>
+											<div class="radio">
+												<label><input type="radio" name="grid-accuracy" class="grid-accuracy" value="4" checked="checked"> Accurate to 4 digits</label>
+												<label><input type="radio" name="grid-accuracy" class="grid-accuracy" value="6"> Accurate to 6 digits</label>
+											</div>
+											<p class="text-label">4-Digit Line Color</p>
+											<div class="graphics-colors-container">
+												<div class="graphics-color-selected" style="background-color: black;"></div>
+												<div class="graphics-color-bar">
+													<div class="item selected" style="background-color: black;"></div>
+													<div class="item" style="background-color: gray;"></div>
+												</div>
+											</div>
+											<p class="text-label">6-Digit Line Color</p>
+											<div class="graphics-colors-container">
+												<div class="graphics-color-selected" style="background-color: gray;"></div>
+												<div class="graphics-color-bar">
+													<div class="item" style="background-color: black;"></div>
+													<div class="item selected" style="background-color: gray;"></div>
+												</div>
+											</div>
+											<p class="text-label">Grid Zone Line Color</p>
+											<div class="graphics-colors-container">
+											<div class="graphics-color-selected" style="background-color: red;"></div>
+												<div class="graphics-color-bar">
+													<div class="item" style="background-color: black;"></div>
+													<div class="item" style="background-color: gray;"></div>
+													<div class="item selected" style="background-color: red;"></div>
+													<div class="item" style="background-color: blue;"></div>
+												</div>
+											</div>
+											<p class="text-label">4-Digit Marker Color</p>
+											<div class="graphics-colors-container">
+												<div class="graphics-color-selected" style="background-color: yellow;"></div>
+												<div class="graphics-color-bar">
+													<div class="item selected" style="background-color: yellow;"></div>
+													<div class="item" style="background-color: #EEE;"></div>
+												</div>
+											</div>
+											<p class="text-label">6-Digit Marker Color</p>
+											<div class="graphics-colors-container">
+												<div class="graphics-color-selected" style="background-color: #EEE;"></div>
+												<div class="graphics-color-bar">
+													<div class="item" style="background-color: yellow;"></div>
+													<div class="item selected" style="background-color: #EEE;"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<hr>
+									<div class="row">
+										<div class="col-md-2 col-md-offset-8">
+											<button class="btn btn-primary btn-block create-grid">Create Grid</button>
+										</div>
+										<div class="col-md-2">
+											<button class="btn btn-danger btn-block delete-grid">Delete Grid</button>
+										</div>
+									</div>
+								</div>
+								<div class="content" data-section="units">
+									<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+									<h3>Units and Equipment <small>References: FM 1-02 (September 2004) and ADRP 1-02 (February 2015)</small></h3>
+									<p>Use this panel to add units and equipment to your graphics</p>
+									<hr>
+									<div class="row">
+										<div class="col-md-3">
+											<label>Symbol Type</label>
+											<select class="form-control type">
+												<option value="u">Unit</option>
+												<!--<option>Equipment</option>-->
+											</select>
+										</div>
+										<div class="col-md-3">
+											<label>Identification</label>
+											<select class="form-control identity"></select>
+										</div>
+										<div class="col-md-3">
+											<label>Icon</label>
+											<select class="form-control icon"></select>
+										</div>
+										<div class="col-md-3">
+											<label>Echelon</label>
+											<select class="form-control echelon"></select>
+										</div>
+									</div>
+									<div class="row spaced">
+										<div class="col-md-6">
+											<svg width="460" height="334" viewBox="0 0 930 700"></svg>
+										</div>
+										<div class="col-md-6">
+											<div class="row">
+												<div class="col-md-6">
+													<label>Reinforced / Detached</label>
+													<div class="radio">
+														<label><input type="radio" name="refdet" class="refdet" checked="checked" value="n">None</label>
+													</div>
+													<div class="radio">
+														<label><input type="radio" name="refdet" class="refdet" value="r">Reinforced</label>
+													</div>
+													<div class="radio">
+														<label><input type="radio" name="refdet" class="refdet" value="d">Detached</label>
+													</div>
+												</div>
+												<div class="col-md-6">
+													<label>Team / Task Force Indicator</label>
+														<div class="checkbox">
+															<label><input type="checkbox">Add Task Force Indicator</label>
+														</div>
+												</div>
+											</div>
+											<div class="row spaced">
+												<div class="col-md-6">
+													<label>Country Indicator</label>
+													<select class="form-control country">
+														<option value="false">-- None --</option>
+													</select>
+												</div>
+												<div class="col-md-6">
+													<label>Feint / Dummy Indicator</label>
+													<div class="checkbox">
+														<label><input type="checkbox">Add Feint Indicator</label>
+													</div>
+												</div>
+											</div>
+											<div class="row spaced">
+												<div class="col-md-6">
+													<label>Unit Designation</label>
+													<input class="form-control unit-designation">
+												</div>
+												<div class="col-md-6">
+													<label>Headquarters Indicator</label>
+													<div class="checkbox">
+														<label><input type="checkbox">Add Headquarters Indicator</label>
+													</div>
+												</div>
+											</div>
+											<div class="row spaced">
+												<div class="col-md-6">
+													<label>Higher Formation</label>
+													<input class="form-control higher-unit">
+												</div>
+												<div class="col-md-6">
+													<label>Combat Effectiveness</label>
+													<select class="form-control country">
+														<option value="false">-- None --</option>
+														<option value="g">Fully Operational</option>
+														<option value="a">Substantially Operational</option>
+														<option value="r">Marginally Operational</option>
+														<option value="b">Not Operational</option>
+													</select>
+												</div>
+											</div>
+											<div class="row spaced">
+												<div class="col-md-6">
+													<label>Comments / Location</label>
+													<div class="input-group">
+														<input class="form-control comments">
+														<span class="input-group-btn">
+															<button class="btn btn-default" type="button">Grid</button>
+														</span>
+													</div>
+												</div>
+												<div class="col-md-6">
+													<label>Mobility Indicator</label>
+													<select class="form-control">
+														<option>-- None --</option>
+													</select>
+												</div>
+											</div>
+										</div>
+									</div>
+									<hr>
+									<div class="row">
+										<div class="col-md-2 col-md-offset-10">
+											<button class="btn btn-primary btn-block add-unit">Add Symbol</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="graphics-canvas-container">
+							<svg id="graphics-canvas"></svg>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div id="page_header">
+				<div class="page-header">
+					<div class="row">
+						<div class="col-md-6">
+							<h1>OPORD Builder <small></small></h1>
+						</div>
+						<div class="col-md-6">
+							<div class="page-header-inline">
+								<p class="navbar-text pull-right text-success"></p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<nav class="navbar navbar-default">
+					<ul class="nav navbar-nav" id="main_navigation">
+						<li><a href="#">Admin Information</a></li>
+						<li><a href="#">SITUATION</a></li>
+						<li><a href="#">MISSION</a></li>
+						<li><a href="#">EXECUTION</a></li>
+						<li><a href="#">SUSTAINMENT</a></li>
+						<li><a href="#">COMMAND AND CONTROL</a></li>
+						<li><a href="#">Annexes</a></li>
+					</ul>
+					<a href="/index.html" class="btn btn-primary navbar-btn pull-right">Save and Exit</a>
+				</nav>
+			</div>
+			
+			<div class="row">
+				<div id="annexes-menu" class="col-md-3 panel-group" role="tablist" aria-multiselectable="true">
+					<!-- ANNEXES MENU -->
+				</div>
+				
+				<div class="col-md-8" id="content">
+					<!-- PAGE FRAGMENTS -->
+				</div>
+				
+				<div class="col-md-4" id="preview">
+					<!-- SAMPLE OPORD -->
+					<p class="text-right">Copy __ of __ copies</p>
+					<p class="text-right">2/A/2-11 IN BN</p>
+					<p class="text-right">Fort Benning, GA</p>
+					<p class="text-right">25AUG14</p>
+					<p>&nbsp;</p>
+					<p>OPORD 15-001 (Leader Blitz)</p>
+					<p>&nbsp;</p>
+					<p>References</p>
+					<ol>
+						<li>Map, Fort Benning Military Installation, 1:50,000</li>
+						<li>Google Maps</li>
+					</ol>
+					<p>&nbsp;</p>
+					<p>Time Zone Used Throughout the Order: Eastern Standard Time (Romeo)</p>
+					<p>&nbsp;</p>
+					<p>Timeline: see APPENDIX 01 to ANNEX C (Operation Timeline)
+					<p>&nbsp;</p>
+					<p>Task Organization: see ANNEX A (Task Organization)</p>
+					<p>&nbsp;</p>
+					<ol>
+						<li>
+						SITUATION
+						<ol>
+							<li>
+							Area of Operations: see APPENDIX 02 to ANNEX C (Area of Operations / Area of Interest)<br><br>
+							North: GA 78 Northing<br>
+							South: GA 77 Northing<br>
+							East: MSR MAINE (Jamestown Road)<br>
+							West: GA 00 Easting<br><br>
+							The AO consists of rolling hills with grass approximately 3 feet high. There are some unimproved roads and a seasonal creek that drains into a swamp to the southwest. There is a large hill in the center of the AO (GA 0088 7754), a paved road that runs generally east-west acting as a platoon boundary with 1st PLT to the south, and a paved road that runs generally north-south approximately 2km west of the eastern boundary of the AO that acts as a backstop for the support by fire position.
+							</li>
+							<li>
+							Area of Interest: see APPENDIX 03 TO ANNEX C (Enemy CAS, Artillery/Mortars, Reserve)<br><br>
+							North: GA 78 Northing<br>
+							South: MSR NEW YORK (Sunshine Road and Lumpkin Trail)<br>
+							East: MSR MAINE (Jamestown Road)<br>
+							West: GA 00 Easting<br><br>
+							The enemy has no CAS, rotary wing, or artillery assets. The enemy has three light infantry squads in reserve arrayed between 1km and 3km southeast of our position on OBJ NICKEL. The enemy squads can reinforce the OBJ within 30, 45, and 60 minutes. The trigger for reinforcement is when US forces breach the wire obstacle on OBJ BRONZE. These squads will likely approach the OBJ from the southeast IOT avoid early detection and our indirect fire capabilities.
+							</li>
+							<li>
+							Terrain: see APPENDIX 04 to ANNEX C (Terrain)
+							<ol>
+								<li>
+								Obstacles: existing natural obstacles in our AO consist of rolling hills. The high ground is generally forested and thick vegetation covers the low ground. This will impede dismounted movement. Numerous creeks and tributaries running north to south will restrict mounted movement to the high ground and trail networks. Existing man-made obstacles consist of improved and unimproved trails running north-south and east-west throughout the AO. These trails will cause our forces to change formation and expose us to enemy direct fire. Reinforcing protective obstacles include a trench system, bunker, and double strand concertina wire that must be breached IOT secure OBJ IRON. The trench is dug approximately six feet into the ground and reinforced with 4x4s. The bunker is constructed with 4x4s and sandbags and is able to withstand fire from our M240B machine guns. It has one aperture facing east, and an entrance facing south. We will use an AT-4 to eliminate the threat it poses.
+								</li>
+								<li>
+								Avenues of Approach: see APPENDIX 05 to ANNEX C (Avenues of Approach)
+								<ol>
+									<li>
+									Dismounted: there are two friendly avenues of approach in our AOR. AOA 1 (north) is approximately 2km wide and can facilitate a platoon column squad wedge. AOA 2 (south) is approximately 500m wide and can facilitate a platoon column squad column fireteam wedge. All AOAs can support movement of 5km/hour. There are two enemy avenues of approach in the AO. Enemy AOA 1 is to the west of the trench system and runs from the southwest to the northeast. It is approximately 1km wide and can facilitate a platoon column squad column fireteam wedge. Enemy AOA 2 is directly east of our ORP, and runs from southeast to northwest. It is approximately 1km wide and includes a hard-packed road. It can facilitate a platoon column squad column fireteam wedge moving at 5km/hour or a platoon column squad file at 7km/hour using the road.
+									</li>
+									<li>
+									Mounted: there are paved and hard-packed trails that run throughout the AO. The most likely avenue of approach for mounted assets into the AO is north or south via MSR MAINE (Jamestown Road) and then west via Yankee Road and Good Luck Road. Mounted assets are not expected to influence the operation for either friendly or enemy forces.
+									</li>
+								</ol>
+								</li>
+								<li>
+								Key Terrain: see APPENDIX 06 to ANNEX C (Key Terrain)
+								<ol>
+									<li>
+									K1: Trench System. This provides the enemy with effective cover and concealment for dismounted movement across OBJ IRON. It provides the enemy a defensive position from which to mass combat power.
+									</li>
+									<li>
+									K2: Burm (GA 0088 7754). This is the dominant land feature in our platoon area of responsibility and gives us or the enemy the best observation / fields of fire to observe movement and use direct and indirect fires.
+									</li>
+								</ol>
+								</li>
+								<li>
+								Observation / Fields of Fire: see APPENDIX 04 to ANNEX C (Terrain). In the low ground, visibility is between 50-75 meters. On the high ground, visibility is between 150-200 meters. Our direct-fire weapon systems will be effective beyond visible range. The open area in the center of the AO provides observation/fields of fire up to 600 meters. Observation to the south of the trench system is limited due to vegetation, which becomes sparser as it gets closer to the trench. We have templated an enemy OP to the south of the trench to observe this area. There are three RFLs that will limit our fires in the AO. To the north, there is a platoon boundary between us and 3rd platoon. To the south and west are the platoon boundaries between us and 1st platoon.
+								</li>
+								<li>
+								Cover and Concealment: Long range direct fire will be limited due to the rolling hills throughout the AO. These hills will also aid us and the enemy in breaking contact as well as offering protection from indirect fires. The creeks are tributaries running throughout the AO offer excellent cover and concealment. The trench system is expected to have some form of overhead cover and will provide maximum protection against both direct and indirect fires. The woodline extending from the east and running generally southwest will provide cover for the attacking force as they advance to the trench system. Beyond the woodline, cover will be limited; we will rely on concealment and suppression from our weapons squad before advancing to clear the trench.
+								</li>
+							</ol>
+							</li>
+							<li>
+							Weather
+							<table>
+								<tr>
+									<th>Date</th>
+									<th>BMNT</th>
+									<th>Sunrise</th>
+									<th>Sunset</th>
+									<th>EENT</th>
+									<th>Illumination</th>
+								</tr>
+								<tr>
+									<td>08NOV14</td>
+									<td>0608</td>
+									<td>0639</td>
+									<td>1816</td>
+									<td>1839</td>
+									<td>94%</td>
+								</tr>
+								<tr>
+									<td>09NOV14</td>
+									<td>0609</td>
+									<td>0639</td>
+									<td>1814</td>
+									<td>1838</td>
+									<td>98%</td>
+								</tr>
+								<tr>
+									<td>10NOV14</td>
+									<td>0610</td>
+									<td>0640</td>
+									<td>1813</td>
+									<td>1837</td>
+									<td>99%</td>
+								</tr>
+								<tr>
+									<td>11NOV14</td>
+									<td>0611</td>
+									<td>0641</td>
+									<td>1812</td>
+									<td>1836</td>
+									<td>100%</td>
+								</tr>
+							</table>
+							This operation will be conducted during both hours of good and limited visibility. The actual attack will occur during limited visibility, however, given that we will experience almost perfect illumination, the concealing effects will be greatly limited. The attack will be complete just after sunrise, which will allow us to effectively suppress OBJ GOLD and set our defensive posture prior to the expected counterattack. Throughout the operation, there will be an average wind speed of 3-5 knots from northeast to southwest. This will have a minimal effect on our weapon systems at long range. No precipitation is expected during this operation. There will be no cloud cover during this operation. This will limit the concealing effects during hours of limited visibility when combined with full illumination. During the day, the temperature is expected to be between 75-100 degrees. Humidity will be near 80%. This will have negative effects on both us and the enemy. Given the temperature, the enemy is expected to remain static and under cover. Civilian interference on the battlefield will be minimal. Our movement will be made easier given the lack of precipitation, however, our ability to move under noise discipline will be severely hindered. The high humidity will prevent dispersion of our smoke when obscuring the breach site prior to assaulting the trench system.
+							</li>
+							<li>
+							Civil Considerations
+							<ol>
+								<li>
+								Areas
+								</li>
+								<li>
+								Structures
+								</li>
+								<li>
+								Capabilities
+								</li>
+								<li>
+								Organizations
+								</li>
+								<li>
+								People
+								</li>
+								<li>
+								Events
+								</li>
+								<li>
+								SWEAT-MS Analysis
+								</li>
+							</ol>
+							</li>
+							<li>
+							Enemy Forces
+							<ol>
+								<li>
+								Disposition
+								</li>
+								<li>
+								Composition
+								</li>
+								<li>
+								Strength
+								</li>
+								<li>
+								High Value Targets
+								</li>
+								<li>
+								Red Checkbook
+								</li>
+								<li>
+								Capabilities by Warfighting Function
+								<table>
+									<tr>
+										<th></th>
+										<th>Strengths</th>
+										<th>Weaknesses</th>
+										<th>Conclusions</th>
+									</tr>
+									<tr>
+										<td class="bold">Movement / Maneuver</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr>
+										<td class="bold">Fires / CCA</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr>
+										<td class="bold">Protection</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr>
+										<td class="bold">Intelligence</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr>
+										<td class="bold">Sustainment</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<tr>
+										<td class="bold">Mission Command</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+								</table>
+								</li>
+								<li>
+								Enemy COA Statement: see APPENDIX 04 to ANNEX B (Enemy SITTEMP). The purpose of the enemy’s operation is to prevent our forces from massing combat power in the zone. They will accomplish this by conducting an area defense. Decisive to their operation is the establishment of fortified fighting positions in the AO. It is decisive because it prevents our forces from displacing them and allows them to project combat power throughout the zone. Their end state will be met when they have occupied defensive positions throughout the zone, US forces have been defeated in the zone, and they have retained OBJ BRONZE.
+								</li>
+							</ol>
+							</li>
+							<li>
+							Friendly Forces
+							</li>
+						</ol>
+						</li>
+					</ol>
+				</div>
+			</div>
+			
+		</div>
+	</body>
+</html>

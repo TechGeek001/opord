@@ -1,0 +1,45 @@
+.alert {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.btn {
+	text-align: left;
+}
+
+.dropdown-menu li.active a, .dropdown-menu li.active:hover a {
+	background-color: #e7e7e7;
+	color: #333;
+}
+
+.panel>.list-group:first-child .list-group-item:first-child, .panel>.panel-collapse>.list-group:first-child .list-group-item:first-child {
+	border-radius: 0;
+}
+
+.list-group-item {
+	padding-left: 30px;
+}
+
+input[type="text"] {
+	margin-bottom: 10px;
+}
+
+.glyphicon.red {
+	color: red;
+}
+
+.glyphicon.green {
+	color: green;
+}
+
+.navbar-text.text-success {
+	color: #3c763d;
+}
+
+.navbar-btn.pull-right {
+	margin-right: 9px;
+}
+
+.page-header {
+	margin-top: 0;
+}
