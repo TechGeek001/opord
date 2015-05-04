@@ -98,7 +98,7 @@ AnnexController.prototype.init = function(controllers) {
 		"left": "50%",
 		"margin-left": (canvasWidth / -2) + "px"
 	});
-	this.G = new GraphicsBuilder("graphics-canvas", canvasWidth, canvasHeight);
+	this.G = new GraphicsBuilder("graphics-canvas", canvasWidth - 2, canvasHeight - 2);
 	this.G.setImage(-100, -100, canvasWidth, canvasHeight, 1.3, "img/galloway.png");
 	
 	this.introControls();
@@ -119,15 +119,7 @@ AnnexController.prototype.graphicsControls = function() {
 	var $panel = this.MAIN_PANEL.find(".annex-part[data-part='graphics']");
 	var $canvasContainer = $("#graphics-canvas-container");
 	var $canvas = $("#graphics-canvas");
-	var svgElement = $canvas.find("svg")[0];
-	var $gridReporter = $("<div>").css({
-		position: "absolute",
-		bottom: "2px",
-		right: "2px",
-		zIndex: 100,
-		backgroundColor: "white",
-		fontSize: "16px"
-	});
+	var $gridReporter = $("#grid-reporter").hide();
 	
 	// GRID CONTROLS
 	var $gridPanel = $panel.find(".content[data-section='grid']");
@@ -205,7 +197,6 @@ AnnexController.prototype.graphicsControls = function() {
 		);
 	});
 	// Show the grid location of the mouse pointer if the grid has been palced
-	$gridReporter.appendTo($canvasContainer);
 	$canvas.mousemove(function(e) {
 		var g = Controller.G.gridToPixel(e);
 		if(g) {
@@ -223,9 +214,103 @@ AnnexController.prototype.graphicsControls = function() {
 	});
 	
 	// UNITS CONTROLS
+	
+	
+	var symbolClick = function(e, i) {
+		e.stopPropagation();
+		// Disable the selection that double clicking causes
+		if(document.selection && document.selection.empty) {
+			document.selection.empty();
+		} else if(window.getSelection) {
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+		}
+		toggleSmallUnitPanel(i);
+	}
+	
+	var linkUnitToGrid = function(s) {
+		Controller.G.linkUnitToGrid(s, function() {
+			// TODO CALLBACK
+		});
+	}
+	
+	var $unitSmallMenu = $("#unit-small-menu").hide();
+	var $unitSmallMenuOne = $unitSmallMenu.find(".select-one");
+	var $unitSmallMenuMany = $unitSmallMenu.find(".select-many");
+	var selectedUnits = new Array();
+	var startingSize = .35;
 	var $unitsPanel = $panel.find(".content[data-section='units']");
 	var $unitPreviewCanvas = $unitsPanel.find("svg");
-	var unitPreview = new Unit().draw($unitPreviewCanvas[0]);
+	var unitPreview = new Unit().settings({scale: startingSize}).draw($unitPreviewCanvas[0]);
+	var selectedUnits = null;
+	
+	// Define the function when a unit is selected and deselected
+	this.G.onSelectCallback = function(u) {
+		$unitSmallMenu.find(".number").text(u.length);
+		if(u.length == 1) {
+			$unitSmallMenu.find(".unit-designation").val(u[0].AMPLIFIERS[3]);
+			$unitSmallMenu.find(".higher-unit").val(u[0].AMPLIFIERS[4]);
+			$unitSmallMenu.find(".comments").val(u[0].AMPLIFIERS[5]);
+			$unitSmallMenu.show();
+			$unitSmallMenuOne.show();
+			$unitSmallMenuMany.hide();
+		} else {
+			$unitSmallMenuOne.hide();
+			$unitSmallMenuMany.show();
+		}
+		selectedUnits = u;
+	}
+	
+	this.G.offSelectCallback = function(u) {
+		if(u.length == 0) {
+			$unitSmallMenu.hide();
+			selectedUnits = u;
+		} else if(u.length == 1) {
+			Controller.G.onSelectCallback(u);
+		}
+	}
+	
+	$unitSmallMenu.find(".close").click(function() {
+		$unitSmallMenu.hide();
+	});
+	
+	$unitSmallMenu.find(".copy-unit").click(function() {
+		var newSymbols = new Array();
+		for(var i = 0; i < selectedUnits.length; i++) {
+			newSymbols.push(Controller.G.addSymbol(selectedUnits[i].copy()));
+		};
+		console.log(newSymbols);
+	});
+	
+	$unitSmallMenu.find(".delete-unit").click(function() {
+		var s = Controller.G.getSelectedSymbols();
+		for(var i = 0; i < s.length; i++) {
+			Controller.G.removeSymbol(s[i].getElement().getAttribute("data-index"));
+		}
+		toggleSmallUnitPanel();
+	});
+	// Change the unit designation
+	$unitSmallMenu.find(".unit-designation").on("input", function() {
+		var string = $(this).val();
+		$canvas.find(".selected").each(function() {
+			Controller.G.getSymbol($(this).data("index")).amplifiers({3: string}).draw();
+		});
+	});
+	// Change the higher formation
+	$unitSmallMenu.find(".higher-unit").on("input", function() {
+		var string = $(this).val();
+		$canvas.find(".selected").each(function() {
+			Controller.G.getSymbol($(this).data("index")).amplifiers({4: string}).draw();
+		});
+	});
+	// Change the comments/location
+	$unitSmallMenu.find(".comments").on("input", function() {
+		var string = $(this).val();
+		$canvas.find(".selected").each(function() {
+			Controller.G.getSymbol($(this).data("index")).amplifiers({5: string}).draw();
+		});
+	});
+	
 	// Add all of the options to the select fields
 	var identities = unitPreview.identities();
 	var $identity = $unitsPanel.find("select.identity");
@@ -247,6 +332,11 @@ AnnexController.prototype.graphicsControls = function() {
 			$("<option>").attr({
 				value: k,
 				selected: "selected"
+			}).text(v.title).data("type", v.type).appendTo($icon);
+		} else if(typeof v.definition === "undefined") {
+			$("<option>").attr({
+				value: k,
+				disabled: "disabled"
 			}).text(v.title).data("type", v.type).appendTo($icon);
 		} else {
 			$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($icon);
@@ -274,68 +364,111 @@ AnnexController.prototype.graphicsControls = function() {
 	$.each(countries, function(k, v) {
 		$("<option>").attr("value", v[1]).text(v[2]).appendTo($country);
 	});
+	// Set the headquarters selector
+	var $headquarters = $unitsPanel.find("select.headquarters");
 	// Set the unit designation
 	var $unitDesignation = $unitsPanel.find("input.unit-designation");
 	// Set the higher formation
 	var $higherUnit = $unitsPanel.find("input.higher-unit");
 	// Set the comments/location
 	var $comments = $unitsPanel.find("input.comments");
+	// Set the Taskforce modifier
+	var $tf = $unitsPanel.find("input.tf");
+	// Set the feint/dummy modifier
+	var $fd = $unitsPanel.find("input.fd");
+	// Set the size slider
+	var $size = $("#size-slider");
+	$size.slider({
+		value: startingSize,
+		min: .2,
+		max: .7,
+		step: .05,
+		slide: function(event, ui) {
+			unitPreview.settings({scale: ui.value}).draw();
+		},
+		change: function(event, ui) {
+			unitPreview.settings({scale: ui.value}).draw();
+		}
+    });
+	// Set the frame type
+	var $frameType = $unitsPanel.find(".icon-type");
 	// Change the unit identification
 	$identity.change(function() {
-		unitPreview.identity($(this).val()).draw($unitPreviewCanvas[0]);
+		unitPreview.identity($(this).val()).draw();
 	}).change();
 	// Change the unit icon
 	$icon.change(function() {
-		unitPreview.icon($(this).val()).draw($unitPreviewCanvas[0]);
+		unitPreview.icon($(this).val()).draw();
 	}).change();
 	// Change the unit echelon
 	$echelon.change(function() {
-		unitPreview.echelon($(this).val()).draw($unitPreviewCanvas[0]);
+		unitPreview.echelon($(this).val()).draw();
 	}).change();
 	// Change reinforced/detached
 	$refdet.click(function() {
-		unitPreview.amplifier({1: $(this).val()}).draw($unitPreviewCanvas[0]);
+		unitPreview.amplifiers({1: $(this).val()}).draw();
 	});
 	// Change country indicator
 	$country.change(function() {
-		unitPreview.amplifier({2: $(this).val()}).draw($unitPreviewCanvas[0]);
+		unitPreview.amplifiers({2: $(this).val()}).draw();
+	});
+	// Change the headquarters type
+	$headquarters.change(function() {
+		var isHeadquarters = $(this).val() != "false";
+		unitPreview.amplifiers({10: {a: isHeadquarters}});
+		if(isHeadquarters) {
+			$echelon.val("none");
+			unitPreview.echelon("none");
+			if($(this).val() != "true") {
+				unitPreview.amplifiers({14: $(this).val()});
+			} else {
+				unitPreview.amplifiers({14: false});
+			}
+			unitPreview.draw();
+		} else {
+			unitPreview.amplifiers({14: false});
+			$echelon.change();
+		}
 	});
 	// Change the unit designation
 	$unitDesignation.on("input", function() {
-		unitPreview.amplifier({3: $(this).val()}).draw($unitPreviewCanvas[0]);
+		unitPreview.amplifiers({3: $(this).val()}).draw();
 	});
 	// Change the higher formation
 	$higherUnit.on("input", function() {
-		unitPreview.amplifier({4: $(this).val()}).draw($unitPreviewCanvas[0]);
+		unitPreview.amplifiers({4: $(this).val()}).draw();
 	});
 	// Change the comments/location
 	$comments.on("input", function() {
-		unitPreview.amplifier({5: $(this).val()}).draw($unitPreviewCanvas[0]);
+		unitPreview.amplifiers({5: $(this).val()}).draw();
+	});
+	// Change the TaskForce modifier
+	$tf.click(function() {
+		unitPreview.amplifiers({8: $(this).is(":checked")}).draw();
+	});
+	// Change the feint/dummy modifier
+	$fd.click(function() {
+		unitPreview.amplifiers({9: $(this).is(":checked")}).draw();
+	});
+	// Change the icon type
+	$frameType.click(function() {
+		unitPreview.settings({type: $(this).val()}).draw();
 	});
 	// Add the symbol to the graphics
 	$unitsPanel.find($(".add-unit").click(function() {
-		unitPreview.draw($unitPreviewCanvas[0], {size: .3});
-		var $u = $($unitPreviewCanvas.children("g")[0]);
-		$u.dblclick(function() {
-			// Disable the selection that double clicking causes
-			if(document.selection && document.selection.empty) {
-				document.selection.empty();
-			} else if(window.getSelection) {
-				var sel = window.getSelection();
-				sel.removeAllRanges();
-			}
-			console.log("opening menu");
-			// TODO: Open the edit/delete menu
-		});
-		Controller.G.addSymbol(unitPreview); // TODO: unitPreview.copy()
+		unitPreview.draw();
+		Controller.G.addSymbol(unitPreview);
+		Controller.G.removeSelectedSymbol();
+		$unitSmallMenu.hide();
 		// Create a new unit for the preview
 		unitPreview = new Unit($identity.val(), $icon.val(), $echelon.val()).draw($unitPreviewCanvas[0]);
 		// Reset the options
-		$refdet.val("");
+		$refdet.eq(0).prop("checked", "checked");
 		$country.val("false");
 		$unitDesignation.val("");
 		$higherUnit.val("");
 		$comments.val("");
+		$size.slider("value", startingSize);
 		Controller.closeAnnexBuilderSection("graphics");
 	}));
 }

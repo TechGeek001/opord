@@ -1,4 +1,4 @@
-function Unit(id, icn, ech, options, settings) {
+function Unit(id, icn, ech, amplifiers, settings, flags) {
 	this.IDENTITY = null;
 	this.ICON = null;
 	this.ECHELON = null;
@@ -25,51 +25,147 @@ function Unit(id, icn, ech, options, settings) {
 		14: null
 	}
 	this.SETTINGS = {
-		type: "full"
+		type: "full",
+		translate: false,
+		rotate: false,
+		scale: .5,
+		skew: false,
+		matrix: false
 	}
 	this.SVG_GROUP = null;
+	this.FLAGS = {
+		dragged: false,
+		linked: false,
+		selected: false,
+		selectedIndex: -1
+	}
+	
+	this.getTransformValues = function(e) {
+		if(typeof e === "undefined") {
+			e = this.SVG_GROUP;
+		}
+		var atrString = e.getAttribute("transform") ? e.getAttribute("transform") : "";
+		var attributes = new Array("translate", "rotate", "scale", "skew", "matrix");
+		var values = {};
+		for(var i = 0; i < attributes.length; i++) {
+			var regexp = new RegExp(attributes[i] + "\\(([^)]+)\\)");
+			// Get the original value
+			var str = atrString.match(regexp) ? atrString.match(regexp)[1] : false;
+			// Add back the parentheses
+			if(str) {
+				values[attributes[i]] = str.split(",");
+			}
+		}
+		return values;
+	}
+	
+	this.setTransformValues = function(e) {
+		if(typeof e === "undefined") {
+			e = this.SVG_GROUP;
+		}
+		var atrString = e.getAttribute("transform") ? e.getAttribute("transform") : "";
+		var attributes = new Array("translate", "rotate", "scale", "skew", "matrix");
+		var values = new Array();
+		for(var i = 0; i < attributes.length; i++) {
+			var regexp = new RegExp(attributes[i] + "\\(([^)]+)\\)");
+			// Get the original value
+			var str = atrString.match(regexp) ? atrString.match(regexp)[1] : false;
+			// Update with the new value
+			var str = typeof this.SETTINGS[attributes[i]] !== "undefined" ? this.SETTINGS[attributes[i]] : str;
+			// Add back the parentheses
+			if(str) {
+				values.push(attributes[i] + "(" + str + ")");
+			}
+		}
+		e.setAttributeNS(null, "transform", values.join(" "));
+	}
 	
 	// Check that all of the fields are correct and that the definitions exist
+	this.SVG_GROUP = document.createElementNS("http://www.w3.org/2000/svg", "g");
 	this.identity(id);
 	this.icon(icn);
 	this.echelon(ech);
-	if(typeof options !== "undefined") {
-		this.options(options);
+	if(typeof amplifiers !== "undefined") {
+		this.amplifiers(amplifiers);
 	}
 	if(typeof settings !== "undefined") {
 		this.settings(settings);
 	}
-	this.SVG_GROUP = document.createElementNS("http://www.w3.org/2000/svg", "g");
+	if(typeof flags !== "undefined") {
+		this.flags(flags);
+	}
 	
 	return this;
 }
 
+/**
+ * Update the identity of this unit
+ *
+ * @method identity
+ * @param {String} id							The new ID for this unit
+ * @return {Object} this
+ */
 Unit.prototype.identity = function(id) {
 	if(this.identities(id)) {
 		this.IDENTITY = id;
+	} else {
+		console.error("The given ID (" + id + ") is not valid.");
 	}
 	return this;
 }
 
+/**
+ * Update the icon of this unit
+ *
+ * @method icon
+ * @param {String} icn							The new icon for this unit
+ * @return {Object} this
+ */
 Unit.prototype.icon = function(icn) {
 	if(this.icons(icn)) {
 		this.ICON = icn;
+	} else {
+		console.error("The given icon (" + icn + ") is not valid.");
 	}
 	return this;
 }
 
+/**
+ * Update the echelon of this unit
+ *
+ * @method echelon
+ * @param {String} ech							The new echelon for this unit
+ * @return {Object} this
+ */
 Unit.prototype.echelon = function(ech) {
 	if(this.echelons(ech)) {
 		this.ECHELON = ech;
+	} else {
+		console.error("The given echelon (" + ech + ") is not valid.");
 	}
 	return this;
 }
 
-Unit.prototype.modifier = function(m) {
+/**
+ * TODO
+ * Update the modifiers for this unit
+ *
+ * @method modifier
+ * @param {String} icn							The modifier to add to this unit
+ * @return {Object} this
+ */
+Unit.prototype.modifiers = function(m) {
 	return this;
 }
 
-Unit.prototype.amplifier = function(a) {
+/**
+ * Update the amplifiers for this unit
+ *
+ * @method amplifier
+ * @param {Object} a							The amplifiers for this unit (1-5, 7-14)
+ * @return {Object} this
+ */
+Unit.prototype.amplifiers = function(a) {
 	if(typeof a !== "undefined") {
 		for(var i = 1; i <= 14; i++) {
 			if(typeof a[i] !== "undefined") {
@@ -127,7 +223,7 @@ Unit.prototype.amplifier = function(a) {
 						/*
 						Quantity that identifies the number of items present.
 						*/
-						if(isNumeric(s) && s > 0) {
+						if(!isNaN(s) && s > 0) {
 							this.AMPLIFIERS[i] = s;
 						}
 						break;
@@ -154,6 +250,9 @@ Unit.prototype.amplifier = function(a) {
 						b.	Offset location indicator is used to denote precise location of headquarters or to declutter
 						multiple unit locations and headquarters. (See figure 4-3 on page 4-11.)
 						*/
+						if(typeof s.a === "boolean") {
+							this.AMPLIFIERS[i] = s;
+						}
 						break;
 					case(11):
 						/*
@@ -177,6 +276,7 @@ Unit.prototype.amplifier = function(a) {
 						/*
 						Indicates what type of headquarters element is being displayed. (See table 4-8 on page 4-35.)
 						*/
+						this.AMPLIFIERS[i] = s;
 						break;
 				}
 			}
@@ -185,29 +285,96 @@ Unit.prototype.amplifier = function(a) {
 	return this;
 }
 
+/**
+ * Update the graphical settings for this unit
+ *
+ * @method settings
+ * @param {Object} s							The settings to add or overwrite
+ * @return {Object} this
+ */
 Unit.prototype.settings = function(s) {
 	for(var k in s) {
 		switch(k) {
 			case("type"):
-				if(s[k] == "full" || s[k] == "outline") {
-					this.SETTINGS.type = s[k];
+				if(s[k] == "color" || s[k] == "full" || s[k] == "min") {
+					this.SETTINGS[k] = s[k];
+				} else {
+					console.error("The setting value (" + s[k] + ") for " + k + " is not valid.");
 				}
 				break;
+			case("translate"):
+				this.SETTINGS[k] = s[k];
+				this.setTransformValues();
+				break;
+			case("scale"):
+				if(s[k] > 0 && s[k] <= 1) {
+					this.SETTINGS[k] = s[k];
+					this.setTransformValues();
+				} else {
+					console.error("The setting value (" + s[k] + ") for " + k + " is not valid.");
+				}
+				break;
+			default:
+				console.log("TEST: The unknown setting value (" + s[k] + ") for " + k + " was changed.");
+				this.SETTINGS[k] = s[k];
 		}
 	}
 	return this;
 }
 
-Unit.prototype.draw = function(canvas, options) {
+/**
+ * Update the flags for this unit
+ *
+ * @method flags
+ * @param {Object|String} f						The flags to overwrite OR the flag value to return
+ * @return {Object|String} this OR the value of the flag
+ */
+Unit.prototype.flags = function(f) {
+	if(typeof f == "string") {
+		if(typeof this.FLAGS[f] !== "undefined") {
+			return this.FLAGS[f];
+		} else {
+			return null;
+		}
+	} else {
+		for(var k in f) {
+			switch(k) {
+				case("dragged"):
+				case("linked"):
+					if(typeof f[k] === "boolean") {
+						this.FLAGS[k] = f[k];
+					}
+					break;
+				case("selected"):
+					if(typeof f[k] === "boolean") {
+						this.FLAGS[k] = f[k];
+					}
+					this.draw();
+					break;
+				case("selectedIndex"):
+					if(!isNaN(f[k])) {
+						this.FLAGS[k] = f[k];
+					}
+					break;
+			}
+		}
+		return this;
+	}
+}
+
+/**
+ * Draw the unit on the given canvas (should be an SVG element)
+ *
+ * @method draw
+ * @param {Object} canvas							The DOM object to write this unit to
+ * @return {Object} this
+ */
+Unit.prototype.draw = function(canvas) {
 	var xmlns = "http://www.w3.org/2000/svg";
 	
 	var rectWidth = 384;
 	var rectHeight = 240;
 	var diamondWidth = 340;
-	
-	if(typeof options === "undefined") {
-		options = {}
-	}
 	
 	/**
 	 * Draw a line from x1y1 to x2y2
@@ -260,6 +427,9 @@ Unit.prototype.draw = function(canvas, options) {
 		r.setAttributeNS(null, "y", y);
 		r.setAttributeNS(null, "width", w);
 		r.setAttributeNS(null, "height", h);
+		if(typeof o.fill !== "undefined") {
+			r.setAttributeNS(null, "fill", o.fill);
+		}
 		if(typeof o.stroke !== "undefined") {
 			r.setAttributeNS(null, "stroke", o.stroke);
 		}
@@ -364,6 +534,8 @@ Unit.prototype.draw = function(canvas, options) {
 		t.textContent = text;
 		if(typeof o.strokeWidth !== "undefined") {
 			t.setAttributeNS(null, "stroke-width", o.strokeWidth);
+		} else {
+			t.setAttributeNS(null, "stroke-width", 2);
 		}
 		if(typeof o.fill !== "undefined") {
 			t.setAttributeNS(null, "fill", o.fill);
@@ -382,7 +554,7 @@ Unit.prototype.draw = function(canvas, options) {
 		var fillColor = this.SETTINGS.type == "full" ? frame.color : "transparent";
 		var lineType = frame.dasharray == false ? false : frame.dasharray;
 		// Width and height will be updated when the frame is built
-		var border = 4;
+		var border = 6;
 		var echelonSpacer = 8;
 		var textSpacer = 16;
 		var textHeight = 94;
@@ -392,8 +564,8 @@ Unit.prototype.draw = function(canvas, options) {
 		var width = 0;
 		var height = 0;
 		// Some extra dimensions to take into account later
-		var taskforceHeight = rectHeight / 3;												// The height of the taskforce (1/3 the rectangle height)
-		var echelonHeight = rectHeight / 4;													// The height of the echelon (1/4 the rectangle height)
+		var taskforceHeight = (rectHeight + border) / 3;									// The height of the taskforce (1/3 the rectangle height)
+		var echelonHeight = (rectHeight + border) / 4;										// The height of the echelon (1/4 the rectangle height)
 		var diamondWidthOffset = (rectWidth - rectHeight) / 2;								// The extra width created by translating the diamond
 		var diamondHeightOffset = ((rectHeight * hypotenuseConstant) - rectHeight) / 2;		// The extra height created by translating the diamond
 		var squareWidthOffset = (rectWidth - rectHeight) / 2;								// The extra width created by centering the square
@@ -433,19 +605,19 @@ Unit.prototype.draw = function(canvas, options) {
 				case("diamond"):
 					width = rectHeight;
 					height = rectHeight;
-					centerX = (width / 2) + diamondWidthOffset;
-					iconFullWidth = rectWidth / diamondConstant;
-					iconFullHeight = rectHeight / diamondConstant;
-					iconDiamondWidthOffset = (rectWidth - iconFullWidth) / 2;
-					iconDiamondHeightOffset = (rectHeight - iconFullHeight) / 2;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					var o = !frame.dasharray ? {rotate: "45 " + width / 2 + " " + height / 2} : {rotate: "45 " + width / 2 + " " + height / 2, dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					frameGroup.appendChild(drawRect(0, 0, width, height, o));
-					// Translate to center and make room for the echelon
-					frameGroup.setAttributeNS(null, "transform", "translate(" + diamondWidthOffset + ", " + (taskforceHeight + diamondHeightOffset) + ")");
-					iconGroup.setAttributeNS(null, "transform", "translate(" + iconDiamondWidthOffset + ", " + (taskforceHeight + diamondHeightOffset + iconDiamondHeightOffset) + ")");
 					width = width * hypotenuseConstant;
 					height = height * hypotenuseConstant;
+					centerX = width / 2;
+					iconFullWidth = rectWidth / diamondConstant;
+					iconFullHeight = rectHeight / diamondConstant;
+					iconDiamondWidthOffset = (width - iconFullWidth) / 2;
+					iconDiamondHeightOffset = (height - iconFullHeight) / 4;
+					// Translate to center and make room for the echelon
+					frameGroup.setAttributeNS(null, "transform", "translate(" + ((width - rectHeight) / 2) + ", " + (taskforceHeight + diamondHeightOffset) + ")");
+					iconGroup.setAttributeNS(null, "transform", "translate(" + iconDiamondWidthOffset + ", " + (taskforceHeight + diamondHeightOffset + iconDiamondHeightOffset) + ")");
 					break;
 				case("square"):
 					width = rectHeight;
@@ -462,15 +634,15 @@ Unit.prototype.draw = function(canvas, options) {
 				case("quatrefoil"):
 					width = rectHeight * hypotenuseConstant;
 					height = rectHeight * hypotenuseConstant;
-					centerX = (width / 2) + quatrefoilWidthOffset;
+					centerX = width / 2;
 					iconFullWidth = rectWidth / quatrefoilConstant;
 					iconFullHeight = rectHeight / quatrefoilConstant;
-					iconQuatrefoilWidthOffset = (rectWidth - iconFullWidth) / 2;
+					iconQuatrefoilWidthOffset = (width - iconFullWidth) / 2;
 					iconQuatrefoilHeightOffset = (height - iconFullHeight) / 2;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					frameGroup.appendChild(drawQuatrefoil(width / 2, height / 2, width / 2, o));
 					// Translate to make room for the echelon
-					frameGroup.setAttributeNS(null, "transform", "translate(" + quatrefoilWidthOffset + ", " + taskforceHeight + ")");
+					frameGroup.setAttributeNS(null, "transform", "translate(0, " + taskforceHeight + ")");
 					iconGroup.setAttributeNS(null, "transform", "translate(" + iconQuatrefoilWidthOffset + ", " +  (taskforceHeight + iconQuatrefoilHeightOffset) + ")");
 					break;
 			}
@@ -496,6 +668,7 @@ Unit.prototype.draw = function(canvas, options) {
 		}
 		// Build the echelon
 		if(typeof this.ECHELON !== "undefined") {
+			var echelonFill = this.SETTINGS.type == "min" ? frame.color : "black";
 			switch(this.ECHELON) {
 				case("tmc"):
 					echelonGroup.appendChild(drawCircle(centerX, (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer - (border / 2), {fill: "transparent"}));
@@ -503,18 +676,18 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonWidth = echelonHeight;
 					break;
 				case("sqd"):
-					echelonGroup.appendChild(drawCircle(centerX, (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX, (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
 					echelonWidth = echelonHeight;
 					break;
 				case("sec"):
-					echelonGroup.appendChild(drawCircle(centerX - (echelonHeight / 2) + (echelonSpacer / 2), (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
-					echelonGroup.appendChild(drawCircle(centerX + (echelonHeight / 2) - (echelonSpacer / 2), (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX - (echelonHeight / 2) + (echelonSpacer / 2), (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX + (echelonHeight / 2) - (echelonSpacer / 2), (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
 					echelonWidth = (echelonHeight * 2) + echelonSpacer;
 					break;
 				case("plt"):
-					echelonGroup.appendChild(drawCircle(centerX, (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
-					echelonGroup.appendChild(drawCircle(centerX - echelonHeight + echelonSpacer, (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
-					echelonGroup.appendChild(drawCircle(centerX + echelonHeight - echelonSpacer, (echelonHeight / 2), (echelonHeight / 2) - echelonSpacer, {fill: "black", strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX, (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX - echelonHeight + echelonSpacer, (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
+					echelonGroup.appendChild(drawCircle(centerX + echelonHeight - echelonSpacer, (echelonHeight / 2) - (border / 2), (echelonHeight / 2) - echelonSpacer, {fill: echelonFill, strokeWidth: 0}));
 					echelonWidth = (echelonHeight * 3) + (echelonSpacer * 2);
 					break;
 				case("cpy"):
@@ -539,6 +712,7 @@ Unit.prototype.draw = function(canvas, options) {
 					var y2 = echelonHeight - (echelonSpacer * 1.5);
 					echelonGroup.appendChild(drawLine(x1, y1, x2, y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1, y2, x2, y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = echelonHeight + (echelonSpacer * 2);
 					break;
 				case("div"):
 					var x1 = centerX - (echelonHeight / 2) + (echelonSpacer * 1.5);
@@ -549,6 +723,7 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonGroup.appendChild(drawLine(x1 - (echelonHeight /2) + (echelonSpacer / 2), y2, x2 - (echelonHeight / 2) + (echelonSpacer / 2), y1, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight / 2) - (echelonSpacer / 2), y1, x2 + (echelonHeight / 2) - (echelonSpacer / 2), y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight / 2) - (echelonSpacer / 2), y2, x2 + (echelonHeight / 2) - (echelonSpacer / 2), y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = echelonHeight * 2;
 					break;
 				case("cps"):
 					var x1 = centerX - (echelonHeight / 2) + (echelonSpacer * 1.5);
@@ -562,6 +737,7 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonGroup.appendChild(drawLine(x1 - offset - (echelonHeight / 2) + (echelonSpacer * 2.5), y2, x2 - offset - (echelonHeight / 2) + (echelonSpacer * 2.5), y1, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + offset + (echelonHeight / 2) - (echelonSpacer * 2.5), y1, x2 + offset + (echelonHeight / 2) - (echelonSpacer * 2.5), y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + offset + (echelonHeight / 2) - (echelonSpacer * 2.5), y2, x2 + offset + (echelonHeight / 2) - (echelonSpacer * 2.5), y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = echelonHeight * 3;
 					break;
 				case("amy"):
 					var x1 = centerX - (echelonHeight / 2) + (echelonSpacer * 1.5);
@@ -576,6 +752,7 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonGroup.appendChild(drawLine(x1 - (echelonHeight) - (echelonSpacer * 2.25), y2, x2 - (echelonHeight) - (echelonSpacer * 2.25), y1, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight) + (echelonSpacer * 2.25), y1, x2 + (echelonHeight) + (echelonSpacer * 2.25), y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight) + (echelonSpacer * 2.25), y2, x2 + (echelonHeight) + (echelonSpacer * 2.25), y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = (echelonHeight * 3) + (echelonSpacer * 2);
 					break;
 				case("arg"):
 					var x1 = centerX - (echelonHeight / 2) + (echelonSpacer * 1.5);
@@ -593,6 +770,7 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonGroup.appendChild(drawLine(x1 - offset - (echelonHeight) - (echelonSpacer / 4), y2, x2 - offset - (echelonHeight) - (echelonSpacer / 4), y1, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + offset + (echelonHeight) + (echelonSpacer / 4), y1, x2 + offset + (echelonHeight) + (echelonSpacer / 4), y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + offset + (echelonHeight) + (echelonSpacer / 4), y2, x2 + offset + (echelonHeight) + (echelonSpacer / 4), y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = (echelonHeight * 4) + echelonSpacer;
 					break;
 				case("tht"):
 					var x1 = centerX - (echelonHeight / 2) + (echelonSpacer * 1.5);
@@ -611,12 +789,14 @@ Unit.prototype.draw = function(canvas, options) {
 					echelonGroup.appendChild(drawLine(x1 - (echelonHeight * 1.5) - (echelonSpacer * 5), y2, x2 - (echelonHeight * 1.5) - (echelonSpacer * 5), y1, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight * 1.5) + (echelonSpacer * 5), y1, x2 + (echelonHeight * 1.5) + (echelonSpacer * 5), y2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(x1 + (echelonHeight * 1.5) + (echelonSpacer * 5), y2, x2 + (echelonHeight * 1.5) + (echelonSpacer * 5), y1, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = (echelonHeight * 5) + echelonSpacer;
 					break;
 				case("cmd"):
 					echelonGroup.appendChild(drawLine(centerX - echelonHeight - (echelonSpacer * .5), echelonHeight / 2, centerX - (echelonSpacer * .5), echelonHeight / 2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(centerX - ((echelonHeight + echelonSpacer) / 2), 0, centerX - ((echelonHeight + echelonSpacer) / 2), echelonHeight, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(centerX + echelonHeight + (echelonSpacer * .5), echelonHeight / 2, centerX + (echelonSpacer * .5), echelonHeight / 2, {strokeWidth: echelonSpacer * 1.5}));
 					echelonGroup.appendChild(drawLine(centerX + ((echelonHeight + echelonSpacer) / 2), 0, centerX + ((echelonHeight + echelonSpacer) / 2), echelonHeight, {strokeWidth: echelonSpacer * 1.5}));
+					echelonWidth = (echelonHeight * 2) + (echelonSpacer * 3.5);
 					break;
 			}
 			echelonGroup.setAttributeNS(null, "transform", "translate(0, " + (taskforceHeight - echelonHeight) + ")")
@@ -659,13 +839,68 @@ Unit.prototype.draw = function(canvas, options) {
 			f5Group.setAttributeNS(null, "transform", "translate(" + ((centerX + (width / 2)) + textSpacer) + ", " + ((height + taskforceHeight) + textHeight) + ")");
 			this.SVG_GROUP.appendChild(f5Group);
 		}
-
-		// Add in final options
-		if(typeof options.size !== "undefined" && options.size > 0 && options.size <= 1) {
-			this.SVG_GROUP.setAttributeNS(null, "transform", "scale(" + options.size + ")")
+		if(this.AMPLIFIERS[8]) {
+			var f8Group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			var buffer = taskforceHeight - echelonHeight;
+			f8Group.appendChild(drawLine(centerX - (echelonWidth / 2) - buffer, 0, centerX + (echelonWidth / 2) + buffer, 0));
+			f8Group.appendChild(drawLine(centerX - (echelonWidth / 2) - buffer, 0, centerX - (echelonWidth / 2) - buffer, taskforceHeight));
+			f8Group.appendChild(drawLine(centerX + (echelonWidth / 2) + buffer, 0, centerX + (echelonWidth / 2) + buffer, taskforceHeight));
+			this.SVG_GROUP.appendChild(f8Group);
+		}
+		if(this.AMPLIFIERS[9]) {
+			var f9Group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			f9Group.appendChild(drawLine(0, taskforceHeight, centerX, 0, {dasharray: "20 20"}));
+			f9Group.appendChild(drawLine(centerX, 0, width, taskforceHeight, {dasharray: "20 20"}));
+			this.SVG_GROUP.appendChild(f9Group);
+		}
+		if(this.AMPLIFIERS[10].a) {
+			var f10Group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			f10Group.appendChild(drawLine(0, taskforceHeight, 0, taskforceHeight + (height * 1.75)));
+			this.SVG_GROUP.appendChild(f10Group);
+			if(!this.AMPLIFIERS[14]) {
+				height = height * 1.75;
+			}
+		}
+		if(this.AMPLIFIERS[14]) {
+			var f14Group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			f14Group.appendChild(drawText(centerX, taskforceHeight + height + 70, this.AMPLIFIERS[14].toUpperCase(), "middle", {fill: "black"}));
+			this.SVG_GROUP.appendChild(f14Group);
+			// Add in the height from AMP 10.a
+			height = height * 1.75;
 		}
 		
-		canvas.appendChild(this.SVG_GROUP);
+		// Check for flags that have a graphical component
+		if(this.FLAGS.selected) {
+			var b = document.createElementNS("http://www.w3.org/2000/svg", "g");
+			var dim = this.SVG_GROUP.getBBox();
+			var padding = 20;
+			var bw = width;
+			var bh = height + taskforceHeight - (border / 2);
+			var selSize = 20;
+			b.appendChild(drawRect(selSize / 2, selSize / 2, bw, bh, {fill: "transparent", stroke: "gray", dasharray: "10 10"}));
+			
+			b.appendChild(drawRect(0, 0, selSize, selSize, {fill: "white", stroke: "gray"}));
+			b.appendChild(drawRect(bw / 2, 0, selSize, selSize, {fill: "white", stroke: "gray"}));
+			b.appendChild(drawRect(bw, 0, selSize, selSize, {fill: "white", stroke: "gray"}));
+			
+			b.appendChild(drawRect(0, bh / 2, selSize, selSize, {fill: "white", stroke: "gray"}));
+			b.appendChild(drawRect(bw, bh / 2, selSize, selSize, {fill: "white", stroke: "gray"}));
+			
+			b.appendChild(drawRect(0, bh, selSize, selSize, {fill: "white", stroke: "gray"}));
+			b.appendChild(drawRect(bw / 2, bh, selSize, selSize, {fill: "white", stroke: "gray"}));
+			b.appendChild(drawRect(bw, bh, selSize, selSize, {fill: "white", stroke: "gray"}));
+			
+			b.setAttributeNS(null, "transform", "translate(-" + selSize / 2 + ",-" + selSize / 2 + ")");
+			
+			this.SVG_GROUP.appendChild(b);
+		}
+		
+		// Add in transformation options
+		this.setTransformValues(this.SVG_GROUP);
+		
+		if(typeof canvas !== "undefined") {
+			canvas.appendChild(this.SVG_GROUP);
+		}
 	}
 	return this;
 }
@@ -679,6 +914,18 @@ Unit.prototype.getElement = function() {
 Unit.prototype.toString = function() {
 	var str = "TODO";
 	return str;
+}
+
+// Make a duplicate of this unit
+Unit.prototype.copy = function() {
+	var nu = new Unit(this.IDENTITY, this.ICON, this.ECHELON, this.AMPLIFIERS, this.SETTINGS, this.FLAGS).draw();
+	// Offset the icon so that it can be seen against its original
+	var offset = 20;
+	nu.translate(offset, offset, true);
+	// Ensure the new unit is not selected
+	nu.flags({selected: false, selectedIndex: -1});
+	// Return the newly created unit
+	return nu;
 }
 
 // Unit Identity Definitions
@@ -744,6 +991,23 @@ Unit.prototype.identities = function(id) {
 	} else {
 		return identities;
 	}
+}
+
+// Translate
+Unit.prototype.translate = function(x, y, add) {
+	if(typeof add === "undefined" || typeof add != "boolean") {
+		add = false;
+	}
+	var a = this.getTransformValues().translate;
+	if(add) {
+		a[0] = parseInt(a[0]) + x;
+		a[1] = parseInt(a[1]) + y;
+	} else {
+		a[0] = x;
+		a[1] = y;
+	}
+	var s = a.join(",");
+	this.settings({translate: s}).draw();
 }
 
 // Unit Icon Definitions
@@ -996,6 +1260,9 @@ Unit.prototype.icons = function(icn) {
 // Unit Size Definitions
 Unit.prototype.echelons = function(ech) {
 	var echelons = {
+		"none": {
+			title: "-- None --"
+		},
 		"tmc": {
 			title: "Team / Crew"
 		},

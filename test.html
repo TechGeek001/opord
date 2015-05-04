@@ -1,0 +1,55 @@
+<html>
+	<head>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+			}
+			
+			svg,hr,canvas {
+				display: none;
+			}
+			
+			img {
+				transform: rotate(270deg);
+				transform-origin: bottom right;
+				margin-left: -240px;
+				margin-top: -730px;
+			}
+		</style>
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script>
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+		<script type="text/javascript">
+			var canvas;
+			
+			function convertCanvasToImage(canvas) {
+				var image = new Image();
+				image.src = canvas.toDataURL("image/png");
+				return image;
+			}
+
+			function a() {
+				document.getElementsByTagName("body")[0].appendChild(convertCanvasToImage(canvas));
+			}
+			
+			window.onload = function() {
+				canvas = document.getElementById('canvas');
+				canvg(canvas, document.getElementById("hold").innerHTML.replace(/(\r\n|\n|\r|\t)/gm,""));
+			}
+		</script>
+	</head>
+	<body style="margin: 0">
+		<div id="hold">
+			<svg class="first" width="10in" height="7.5in" viewBox="0 0 970 750">
+				<g>
+					<svg id="graphics-canvas" style="width: 968px; height: 748px;"><g id="image-layer" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"><image x="-100" y="-100" width="970" height="750" transform="scale(1.3)" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="img/galloway.png"></image></g><g id="grid-layer" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke-width="1" stroke="black"><line x1="0" x2="968" y1="604.6" y2="604.6" stroke="gray"></line><line x1="0" x2="968" y1="396.6" y2="396.6" stroke="gray"></line><line x1="0" x2="968" y1="188.60000000000002" y2="188.60000000000002" stroke="gray"></line><line x1="0" x2="968" y1="-19.399999999999977" y2="-19.399999999999977" stroke="gray"></line><line x1="0" x2="968" y1="-227.39999999999998" y2="-227.39999999999998" stroke="gray"></line><line x1="925.6" x2="925.6" y1="0" y2="748" stroke="gray"></line><line x1="717.6" x2="717.6" y1="0" y2="748" stroke="gray"></line><line x1="509.6" x2="509.6" y1="0" y2="748" stroke="gray"></line><line x1="301.6" x2="301.6" y1="0" y2="748" stroke="gray"></line><line x1="93.6" x2="93.6" y1="0" y2="748" stroke="gray"></line><line x1="-114.4" x2="-114.4" y1="0" y2="748" stroke="gray"></line><circle cx="-114.4" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="-114.4" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">004</text><circle cx="-114.4" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="-114.4" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">004</text><circle cx="93.6" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="93.6" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">005</text><circle cx="93.6" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="93.6" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">005</text><circle cx="301.6" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="301.6" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">006</text><circle cx="301.6" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="301.6" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">006</text><circle cx="509.6" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="509.6" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">007</text><circle cx="509.6" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="509.6" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">007</text><circle cx="717.6" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="717.6" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">008</text><circle cx="717.6" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="717.6" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">008</text><circle cx="925.6" cy="12.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="925.6" y="14.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">009</text><circle cx="925.6" cy="735.5" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="925.6" y="737.5" font-size="12.5" text-anchor="middle" alignment-baseline="middle">009</text><circle cx="12.5" cy="-227.39999999999998" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="12.5" y="-225.39999999999998" font-size="12.5" text-anchor="middle" alignment-baseline="middle">777</text><circle cx="955.5" cy="-227.39999999999998" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="955.5" y="-225.39999999999998" font-size="12.5" text-anchor="middle" alignment-baseline="middle">777</text><circle cx="12.5" cy="-19.399999999999977" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="12.5" y="-17.399999999999977" font-size="12.5" text-anchor="middle" alignment-baseline="middle">776</text><circle cx="955.5" cy="-19.399999999999977" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="955.5" y="-17.399999999999977" font-size="12.5" text-anchor="middle" alignment-baseline="middle">776</text><circle cx="12.5" cy="188.60000000000002" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="12.5" y="190.60000000000002" font-size="12.5" text-anchor="middle" alignment-baseline="middle">775</text><circle cx="955.5" cy="188.60000000000002" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="955.5" y="190.60000000000002" font-size="12.5" text-anchor="middle" alignment-baseline="middle">775</text><circle cx="12.5" cy="396.6" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="12.5" y="398.6" font-size="12.5" text-anchor="middle" alignment-baseline="middle">774</text><circle cx="955.5" cy="396.6" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="955.5" y="398.6" font-size="12.5" text-anchor="middle" alignment-baseline="middle">774</text><circle cx="12.5" cy="604.6" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="12.5" y="606.6" font-size="12.5" text-anchor="middle" alignment-baseline="middle">773</text><circle cx="955.5" cy="604.6" r="12.5" stroke-width="0" fill="#EEE"></circle><text x="955.5" y="606.6" font-size="12.5" text-anchor="middle" alignment-baseline="middle">773</text></g></g><g id="symbol-layer" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke-width="4px" fill="red" stroke="black" transform="translate(17,306) scale(0.2)" id="symbol-1" data-index="1"><g transform="translate(49.91999999999999, 129.92)"><rect x="0" y="0" width="240" height="240" transform="rotate(45 120 120)"></rect></g><g transform="translate(66.13621621621621, 182.44756756756755)"><line x1="0" x2="207.56756756756755" y1="129.7297297297297" y2="0"></line><line x1="0" x2="207.56756756756755" y1="0" y2="129.7297297297297"></line></g><g transform="translate(0, 20)"><circle cx="169.92" cy="30" r="22" stroke-width="0" fill="black"></circle></g></g><g stroke-width="4px" fill="blue" stroke="black" transform="translate(815,48) scale(0.2)" id="symbol-2" data-index="2" class="false"><g transform="translate(0, 80)"><rect x="0" y="0" width="384" height="240"></rect></g><g transform="translate(0, 80)"><line x1="0" x2="384" y1="240" y2="0"></line><line x1="0" x2="384" y1="0" y2="240"></line></g><g transform="translate(0, 20)"><circle cx="192" cy="30" r="22" stroke-width="0" fill="black"></circle></g><g transform="translate(400, 228)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">4</text></g><g transform="translate(400, 322)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">3/C/2-11</text></g></g><g transform="translate(692,592) scale(0.2)" stroke-width="4px" fill="blue" stroke="black" id="symbol-3" data-index="3"><g transform="translate(0, 80)"><rect x="0" y="0" width="384" height="240"></rect></g><g transform="translate(0, 80)"><line x1="0" x2="384" y1="240" y2="0"></line><line x1="0" x2="384" y1="0" y2="240"></line></g><g transform="translate(0, 20)"><circle cx="192" cy="30" r="22" stroke-width="0" fill="black"></circle></g><g transform="translate(400, 228)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">1</text></g><g transform="translate(400, 322)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">3/C/2-11</text></g></g><g transform="translate(760,649) scale(0.2)" stroke-width="4px" fill="blue" stroke="black" id="symbol-4" data-index="4"><g transform="translate(0, 80)"><rect x="0" y="0" width="384" height="240"></rect></g><g transform="translate(0, 80)"><line x1="0" x2="384" y1="240" y2="0"></line><line x1="0" x2="384" y1="0" y2="240"></line></g><g transform="translate(0, 20)"><circle cx="192" cy="30" r="22" stroke-width="0" fill="black"></circle></g><g transform="translate(400, 228)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">2</text></g><g transform="translate(400, 322)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">3/C/2-11</text></g></g><g transform="translate(797,569) scale(0.2)" stroke-width="4px" fill="blue" stroke="black" id="symbol-5" data-index="5"><g transform="translate(0, 80)"><rect x="0" y="0" width="384" height="240"></rect></g><g transform="translate(0, 80)"><line x1="0" x2="384" y1="240" y2="0"></line><line x1="0" x2="384" y1="0" y2="240"></line></g><g transform="translate(0, 20)"><circle cx="192" cy="30" r="22" stroke-width="0" fill="black"></circle></g><g transform="translate(400, 228)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">3</text></g><g transform="translate(400, 322)"><text x="0" y="0" font-size="80px" text-anchor="start" alignment-baseline="text-top" stroke-width="0" fill="black">3/C/2-11</text></g></g></g></svg>
+				</g>
+			</svg>
+		</div>
+		<hr>
+		<canvas id="canvas" width="960px" height="720px"></canvas>
+		<hr>
+	</body>
+</html>

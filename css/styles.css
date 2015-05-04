@@ -45,6 +45,10 @@
 	border: 1px solid black;
 }
 
+#annex-builder #graphics-canvas #symbol-layer g {
+	cursor: move;
+}
+
 #annex-builder .annex-part-menu {
 	position: absolute;
 	top: 0;
@@ -76,7 +80,7 @@
 	margin: 10px 0;
 }
 
-#annex-builder .annex-part-section .spaced {
+#annex-builder .annex-part-section .spaced, #unit-small-menu .spaced {
 	margin-top: 10px;
 }
 
@@ -117,6 +121,47 @@
 #annex-builder p.text-label {
 	margin: 0;
 	font-weight: bold;
+}
+
+#unit-small-menu {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 99;
+	width: 300px;
+	box-shadow: 5px 5px 5px #333;
+}
+
+#unit-small-menu .top {
+	background-color: #EEE;
+	padding: 10px 10px 1px 10px;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+#unit-small-menu .sub {
+	background-color: white;
+	padding: 10px;
+}
+
+#unit-small-menu .bottom {
+	background-color: #EEE;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	padding: 10px;
+}
+
+#grid-reporter {
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+	z-index: 100;
+	background-color: white;
+	font-size: 16px
+}
+
+#unit-context-menu .sub label:not(:first-child) {
+	margin-top: 10px;
 }
 
 img {

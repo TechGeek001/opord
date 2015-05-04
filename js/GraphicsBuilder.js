@@ -16,9 +16,15 @@ GraphicsBuilder = function(container, w, h) {
 	this.mouseUpFunction = null;
 	// The function to execute then the mouse is moved on the canvas
 	this.moveFunction = null;
+	// User-defined function when a unit is selected
+	this.onSelectCallback = null;
+	// User-defined function when a unit is deselected
+	this.offSelectCallback = null;
 	
 	// An array of units/equipment
 	this.symbolData = new Array();
+	// An array of units/equipment that are currently selected
+	this.selectedSymbols = new Array();
 	// Background image
 	this.bgData = {
 		x: 0,
@@ -237,22 +243,22 @@ GraphicsBuilder = function(container, w, h) {
 	// PROTECTED MOUSE-CLICK FUNCTIONS
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
-	var initialXPos = 0;			// The x position of the first click in pixels
-	var initialYPos = 0;			// The y position of the first click in pixels
-	var initialXGrid = 0;			// The x position of the first grid as 4 digits
-	var initialYGrid = 0;			// The y position of the first grid as 4 digits
-	var secondXGrid = 0;			// The x position of the second grid as 4 digits
-	var secondYGrid = 0;			// The y position of the second grid as 4 digits
-	var gridSize = 0;				// The width and height of the grid square in pixels
-	var distanceX1 = 0;				// The x position of the first point for known distance
-	var distanceY1 = 0;				// The y position of the first point for known distance
-	var distanceX2 = 0;				// The x position of the second point for known distance
-	var distanceY2 = 0;				// The y position of the second point for known distance
-	var knownDistance = 0;			// The known distance to be measured
-	var knownDistanceUnits = null;	// The units that the known distance is to be measured in
-	var gridAccuracy = 4;			// The number of digits to expand the grid to
-	var originalTranslationX = 0;	// The original translation x value for this unit
-	var originalTranslationY = 0;	// The original translation y value for this unit
+	var initialXPos = 0;					// The x position of the first click in pixels
+	var initialYPos = 0;					// The y position of the first click in pixels
+	var initialXGrid = 0;					// The x position of the first grid as 4 digits
+	var initialYGrid = 0;					// The y position of the first grid as 4 digits
+	var secondXGrid = 0;					// The x position of the second grid as 4 digits
+	var secondYGrid = 0;					// The y position of the second grid as 4 digits
+	var gridSize = 0;						// The width and height of the grid square in pixels
+	var distanceX1 = 0;						// The x position of the first point for known distance
+	var distanceY1 = 0;						// The y position of the first point for known distance
+	var distanceX2 = 0;						// The x position of the second point for known distance
+	var distanceY2 = 0;						// The y position of the second point for known distance
+	var knownDistance = 0;					// The known distance to be measured
+	var knownDistanceUnits = null;			// The units that the known distance is to be measured in
+	var gridAccuracy = 4;					// The number of digits to expand the grid to
+	var originalTranslationX = new Array();	// The original translation x value for this unit
+	var originalTranslationY = new Array();	// The original translation y value for this unit
 	
 	/**
 	 * Place a point on the canvas (e.g. a grid coordinate). Used in conjunction with the crosshair() move event
@@ -480,17 +486,51 @@ GraphicsBuilder = function(container, w, h) {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
 	this.moveUnit = function(e) {
-		// Because this references the unit, the Controller variable is used to refer to the GraphicsBuilder
+		e.stopPropagation();
+		// Because this function is referenced by the unit, the Controller variable is used to refer to the GraphicsBuilder
 		if(Controller.canDrag && e.which == 1) {
-			Controller.dragging = this;
+			Controller.dragging = true;
 			var m = Controller.mousePosition(e);
 			initialXPos = m.x;
 			initialYPos = m.y;
-			var t = Controller.getTransformValues(this).translate;
-			originalTranslationX = t ? parseInt(t[0]) : 0;
-			originalTranslationY = t ? parseInt(t[1]) : 0;
+			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+				var t = Controller.getTransformValues(Controller.symbolData[Controller.selectedSymbols[i]].getElement()).translate;
+				originalTranslationX[i] = t ? parseInt(t[0]) : 0;
+				originalTranslationY[i] = t ? parseInt(t[1]) : 0;
+			}
 			Controller.moveFunction = Controller.changeUnitPosition;
 			Controller.mouseUpFunction = Controller.releaseUnit;
+		}
+	}
+	
+	this.mouseDownToggleSelectUnit = function(e) {
+		// Because this function is referenced by the unit, the Controller variable is used to refer to the GraphicsBuilder
+		e.stopPropagation();
+		if(e.which == 1) {
+			var i = this.getAttribute("data-index");
+			Controller.addSelectedSymbol(i);
+			if(Controller.symbolData[i]) {
+				var s = Controller.symbolData[i];
+				s.flags({selected: true});
+				// If the shift key is not held down, there are multiple symbols selected, and this unit is not already selected, remove all other symbols are deselected
+				if(!e.shiftKey && Controller.selectedSymbols.length > 1 && s.getElement().getAttribute("data-selected") != "true") {
+					var remove = new Array();
+					for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+						if(Controller.selectedSymbols[j] != i) {
+							remove.push(Controller.selectedSymbols[j]);
+						}
+					}
+					Controller.removeSelectedSymbol(remove);
+					// User-defined function
+					if(Controller.onSelectCallback) {
+						var array = new Array();
+						for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+							array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+						}
+						Controller.offSelectCallback(array);
+					}
+				}
+			}
 		}
 	}
 	
@@ -499,9 +539,91 @@ GraphicsBuilder = function(container, w, h) {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
 	this.releaseUnit = function(e) {
-		this.dragging = false;
-		this.moveFunction = null;
-		this.mouseUpFunction = null;
+		if(e.which == 1) {
+			this.dragging = false;
+			this.moveFunction = null;
+			this.mouseUpFunction = null;
+			originalTranslationX = new Array();
+			originalTranslationY = new Array();
+		}
+	}
+	
+	this.mouseUpToggleSelectUnit = function(e) {
+		if(e.which == 1) {
+			// Because this function is referenced by the unit, the Controller variable is used to refer to the GraphicsBuilder
+			var i = this.getAttribute("data-index");
+			if(Controller.symbolData[i]) {
+				var s = Controller.symbolData[i];
+				// Determine if the unit was dragged or not
+				if(s.flags("dragged")) {
+					if(s.getElement().getAttribute("data-selected") == "false") {
+						// If the unit was dragged, and the selected attribute has not been added, the unit is selected
+						s.getElement().setAttribute("data-selected", true);
+						// If the unit was dragged, and the selected attribute has been added, the unit(s) remain selected
+						for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+							Controller.symbolData[Controller.selectedSymbols[j]].flags({dragged: false});
+						}
+						// User-defined function
+						if(Controller.onSelectCallback) {
+							var array = new Array();
+							for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+								array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+							}
+							Controller.onSelectCallback(array);
+						}
+					} else {
+						// If the unit was dragged, and the selected attribute has been added, the unit(s) remain selected
+						for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+							Controller.symbolData[Controller.selectedSymbols[j]].flags({dragged: false});
+						}
+					}
+				} else {
+					if(s.getElement().getAttribute("data-selected") == "false") {
+						// If the unit was not dragged, and the selected attribute has not been added, the unit is selected
+						s.flags({dragged: false}).getElement().setAttribute("data-selected", true);
+						// User-defined function
+						if(Controller.onSelectCallback) {
+							var array = new Array();
+							for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+								array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+							}
+							Controller.onSelectCallback(array);
+						}
+					} else {
+						// If the unit was not dragged, and the selected attribute has already been added, the unit is deselected
+						if(!e.shiftKey && Controller.selectedSymbols.length > 1) {
+							// If the shift key is not held down and there are multiple symbols selected, select ONLY this symbol
+							var remove = new Array();
+							for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+								if(Controller.selectedSymbols[j] != i) {
+									remove.push(Controller.selectedSymbols[j]);
+								}
+							}
+							Controller.removeSelectedSymbol(remove);
+							// User-defined function
+							if(Controller.offSelectCallback) {
+								var array = new Array();
+								for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+									array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+								}
+								Controller.offSelectCallback(array);
+							}
+						} else {
+							// If the shift key is held down, or there are not multiple symbols selected, deselect this symbol (if multiple, all others will remain selected)
+							Controller.removeSelectedSymbol(i);
+							// User-defined function
+							if(Controller.offSelectCallback) {
+								var array = new Array();
+								for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+									array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+								}
+								Controller.offSelectCallback(array);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -652,9 +774,18 @@ GraphicsBuilder = function(container, w, h) {
 	this.changeUnitPosition = function(e) {
 		if(this.canDrag) {
 			var m = Controller.mousePosition(e);
-			var x = originalTranslationX + (m.x - initialXPos);
-			var y = originalTranslationY + (m.y - initialYPos);
-			this.updateTransformValues(this.dragging, {translate: x + "," + y});
+			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+				var x = originalTranslationX[i] + (m.x - initialXPos);
+				var y = originalTranslationY[i] + (m.y - initialYPos);
+				var obj = this.symbolData[this.selectedSymbols[i]];
+				// Don't set the dragged flag until a certain threshhold has been reached (used to display the context menu on the canvas)
+				if(Math.abs(m.x - initialXPos) > 5 || Math.abs(m.y - initialYPos) > 5) {
+					obj.flags({dragged: true}).settings({translate: x + "," + y});
+				} else {
+					// Once the threshhold has been reached, the flag will not reset (must be changed in another function)
+					obj.settings({translate: x + "," + y});
+				}
+			}
 		} else {
 			this.releaseUnit(e);
 		}
@@ -835,16 +966,6 @@ GraphicsBuilder = function(container, w, h) {
 	}
 	
 	/**
-	 * Get the canvas element (useful for other controller classes
-	 *
-	 * @method getCanvasElement
-	 * @return {Object} The canvas DOM object
-	 */
-	this.getCanvasElement = function() {
-		return this.gridLayer;
-	}
-	
-	/**
 	 * Get the transformation value of a unit
 	 */
 	this.getTransformValues = function(e) {
@@ -892,20 +1013,14 @@ GraphicsBuilder = function(container, w, h) {
 		this.container = document.getElementById(container);
 		this.imageLayer = document.createElementNS(this.xmlns, "g");
 		this.imageLayer.setAttribute("id", "image-layer");
-		this.imageLayer.setAttribute("width", w);
-		this.imageLayer.setAttribute("height", h);
 		this.imageLayer.setAttribute("version", "1.1");
 		this.imageLayer.setAttribute("xmlns:xlink", this.xmlnsxlink);
 		this.gridLayer = document.createElementNS(this.xmlns, "g");
 		this.gridLayer.setAttribute("id", "grid-layer");
-		this.gridLayer.setAttribute("width", w);
-		this.gridLayer.setAttribute("height", h);
 		this.gridLayer.setAttribute("version", "1.1");
 		this.gridLayer.setAttribute("xmlns:xlink", this.xmlnsxlink);
 		this.symbolLayer = document.createElementNS(this.xmlns, "g");
 		this.symbolLayer.setAttribute("id", "symbol-layer");
-		this.symbolLayer.setAttribute("width", w);
-		this.symbolLayer.setAttribute("height", h);
 		this.symbolLayer.setAttribute("version", "1.1");
 		this.symbolLayer.setAttribute("xmlns:xlink", this.xmlnsxlink);
 		this.container.appendChild(this.imageLayer);
@@ -919,6 +1034,21 @@ GraphicsBuilder = function(container, w, h) {
 	this.container.addEventListener("click", function(e) {
 		if(Controller.clickFunction && e.which == 1) {
 			Controller.clickFunction(e);
+		}
+		if(Controller.selectedSymbols.length > 0) {
+			// Manually deselect all selected symbols
+			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+				Controller.symbolData[Controller.selectedSymbols[i]].flags({selected: false, dragged: false}).getElement().setAttribute("data-selected", false);
+			}
+			Controller.removeSelectedSymbol();
+			// User-defined function
+			if(Controller.offSelectCallback) {
+				var array = new Array();
+				for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+					array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+				}
+				Controller.offSelectCallback(array);
+			}
 		}
 	});
 	
@@ -934,6 +1064,81 @@ GraphicsBuilder = function(container, w, h) {
 		if(Controller.mouseUpFunction && e.which == 1) {
 			Controller.mouseUpFunction(e)
 		}
+	});
+	
+	var moveValue = 1;
+	var moveDirection = null;
+	var numberOfMoves = 0;
+	var moveIncrement = 5;
+	// Set various keypress functions
+	document.addEventListener("keydown", function(e) {
+		switch(e.keyCode) {
+			// Left key
+			case(37):
+				thisDirection = "left";
+				if(moveDirection == thisDirection) {
+					moveValue = Math.ceil(numberOfMoves / moveIncrement);
+				} else {
+					moveValue = 1;
+					numberOfMoves = 0;
+					moveDirection = thisDirection;
+				}
+				for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+					Controller.symbolData[Controller.selectedSymbols[i]].translate(-(moveValue), 0, true);
+				}
+				numberOfMoves++;
+				break;
+			// Right key
+			case(39):
+				thisDirection = "right";
+				if(moveDirection == thisDirection) {
+					moveValue = Math.ceil(numberOfMoves / moveIncrement);
+				} else {
+					moveValue = 1;
+					numberOfMoves = 0;
+					moveDirection = thisDirection;
+				}
+				for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+					Controller.symbolData[Controller.selectedSymbols[i]].translate(moveValue, 0, true);
+				}
+				numberOfMoves++;
+				break;
+			// Up key
+			case(38):
+				thisDirection = "up";
+				if(moveDirection == thisDirection) {
+					moveValue = Math.ceil(numberOfMoves / moveIncrement);
+				} else {
+					moveValue = 1;
+					numberOfMoves = 0;
+					moveDirection = thisDirection;
+				}
+				for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+					Controller.symbolData[Controller.selectedSymbols[i]].translate(0, -(moveValue), true);
+				}
+				numberOfMoves++;
+				break;
+			// Down key
+			case(40):
+				thisDirection = "down";
+				if(moveDirection == thisDirection) {
+					moveValue = Math.ceil(numberOfMoves / moveIncrement);
+				} else {
+					moveValue = 1;
+					numberOfMoves = 0;
+					moveDirection = thisDirection;
+				}
+				for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+					Controller.symbolData[Controller.selectedSymbols[i]].translate(0, moveValue, true);
+				}
+				numberOfMoves++;
+				break;
+		}
+	});
+	document.addEventListener("keyup", function(e) {
+		moveValue = 1;
+		moveDirection = null;
+		numberOfMoves = 0;
 	});
 	
 	// Set the mouseout functionality
@@ -1238,19 +1443,84 @@ GraphicsBuilder.prototype.getDifference = function(g1, g2) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // UNIT/EQUIPMENT FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-GraphicsBuilder.prototype.addSymbol = function(symbolObject) {
+GraphicsBuilder.prototype.addSymbol = function(symbolObject, draw) {
 	this.symbolData.push(symbolObject);
 	var e = symbolObject.draw(this.symbolLayer).getElement();
-	e.setAttribute("id", "symbol-" + this.symbolData.length);
+	var Controller = this;
+	e.setAttribute("id", "symbol-" + (this.symbolData.length - 1));
+	e.setAttribute("data-index", this.symbolData.length - 1);
+	e.setAttribute("data-selected", false);
+	e.addEventListener("mousedown", this.mouseDownToggleSelectUnit);
+	e.addEventListener("mouseup", this.mouseUpToggleSelectUnit);
 	e.addEventListener("mousedown", this.moveUnit);
-	e.addEventListener("mouseup", this.releaseUnit);
 	return this.symbolData.length - 1;
+}
+
+GraphicsBuilder.prototype.getSymbol = function(i) {
+	if(typeof this.symbolData[i] !== "undefined") {
+		return this.symbolData[i];
+	} else {
+		return false;
+	}
 }
 
 GraphicsBuilder.prototype.removeSymbol = function(i) {
 	if(this.symbolData[i]) {
+		if(this.selectedSymbols.indexOf(i) != -1) {
+			this.removeSelectedSymbol(i);
+		}
 		var e = this.symbolData[i].getElement();
 		this.symbolLayer.removeChild(e);
 	}
 	this.symbolData[i] = null;
+}
+
+// Returns the selected symbols
+GraphicsBuilder.prototype.addSelectedSymbol = function(i, select) {
+	if(typeof i !== "undefined") {
+		if(typeof i === "string") {
+			i = new Array(i);
+		}
+		// Iterate through the array of symbols to add
+		for(var j = 0; j < i.length; j++) {
+			if(this.symbolData[i[j]] && this.selectedSymbols.indexOf(i[j]) == -1) {
+				this.selectedSymbols.push(i[j]);
+			}
+		}
+		// If select, remove the current selection and update it with the symbol(s) just added
+		if(typeof select !== "undefined" && select === true) {
+			this.removeSelectedSymbol();
+			this.symbolData[i].flags({selected: true}).getElement().setAttribute("data-selected", true);
+		}
+	}
+	return this.selectedSymbols;
+}
+
+GraphicsBuilder.prototype.getSelectedSymbols = function() {
+	var array = new Array();
+	for(var j = 0; j < this.selectedSymbols.length; j++) {
+		array.push(this.symbolData[this.selectedSymbols[j]]);
+	}
+	return array;
+}
+
+GraphicsBuilder.prototype.removeSelectedSymbol = function(i) {
+	if(typeof i !== "undefined") {
+		if(typeof i === "string") {
+			i = new Array(i);
+		}
+		// Iterate through the array of symbols to remove
+		for(var j = 0; j < i.length; j++) {
+			if(this.selectedSymbols.indexOf(i[j]) != -1) {
+				this.symbolData[i[j]].flags({selected: false}).getElement().setAttribute("data-selected", false);
+				this.selectedSymbols.splice(this.selectedSymbols.indexOf(i[j]), 1);
+			}
+		}
+	} else {
+		for(var i = 0; i < this.selectedSymbols.length; i++) {
+			this.symbolData[this.selectedSymbols[i]].flags({selected: false}).getElement().setAttribute("data-selected", false);
+		}
+		this.selectedSymbols = new Array();
+	}
+	return this.selectedSymbols;
 }

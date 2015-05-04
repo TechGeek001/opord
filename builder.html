@@ -11,6 +11,9 @@
 		<script type="text/javascript" src="js/AnnexController.js"></script>
 		<script type="text/javascript" src="js/opordBuilder.js"></script>
 		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.theme.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.structure.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.min.css">
 		<link rel="stylesheet" href="css/override.css">
 		<link rel="stylesheet" href="css/styles.css">
 		<link rel="stylesheet" href="css/preview.css">
@@ -21,11 +24,11 @@
 				<div id="annex-builder">
 					<button type="button" class="close main"><span aria-hidden="true">&times;</span></button>
 					<div class="annex-part" data-part="intro">
-						<h2>Annex Builder</h2>
+						<h2>Appendix Builder</h2>
 						<div class="form-group">
 							<label>Title</label>
 							<input type="text" class="form-control annex-title" placeholder="Timeline, Red Checkbook, Scheme of Maneuver Phase I">
-							<p class="help-block">Enter the title for the content you are creating. Annex titles and Appendix numbers will be added automatically</p>
+							<p class="help-block">Enter the title for the content you are creating. Appendix titles and numbers will be added automatically</p>
 						</div>
 						<hr>
 						<div class="row">
@@ -92,7 +95,7 @@
 								<div class="content" data-section="grid">
 									<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
 									<h3>Grid Lines</h3>
-									<p>Use this panel to add grid lines to your graphics</p>
+									<p>Use this panel to add grid lines to your graphics. When entering grid coordinates, use only four, six, or eight digits, and do not include the 100,000 meter identifier (e.g. GA).</p>
 									<hr>
 									<div class="row">
 										<div class="col-md-8">
@@ -203,14 +206,14 @@
 								<div class="content" data-section="units">
 									<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
 									<h3>Units and Equipment <small>References: FM 1-02 (September 2004) and ADRP 1-02 (February 2015)</small></h3>
-									<p>Use this panel to add units and equipment to your graphics</p>
+									<p>Use this panel to add units and equipment to your graphics. Use the minimum number of fields to convey the needed information.</p>
 									<hr>
 									<div class="row">
 										<div class="col-md-3">
 											<label>Symbol Type</label>
 											<select class="form-control type">
 												<option value="u">Unit</option>
-												<!--<option>Equipment</option>-->
+												<option value="e" disabled="disabled">Equipment</option>
 											</select>
 										</div>
 										<div class="col-md-3">
@@ -227,8 +230,33 @@
 										</div>
 									</div>
 									<div class="row spaced">
+										<div class="col-md-3">
+											<label>Country Indicator</label>
+												<select class="form-control country">
+													<option value="false">-- None --</option>
+												</select>
+										</div>
+										<div class="col-md-3">
+											<label>Unit Designation</label>
+											<input class="form-control unit-designation">
+										</div>
+										<div class="col-md-3">
+											<label>Higher Formation</label>
+											<input class="form-control higher-unit">
+										</div>
+										<div class="col-md-3">
+											<label>Comments / Location</label>
+											<div class="input-group">
+												<input class="form-control comments">
+												<span class="input-group-btn">
+													<button class="btn btn-default" type="button">Grid</button>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="row spaced">
 										<div class="col-md-6">
-											<svg width="460" height="334" viewBox="0 0 930 700"></svg>
+											<svg width="460" height="334"></svg>
 										</div>
 										<div class="col-md-6">
 											<div class="row">
@@ -243,72 +271,58 @@
 													<div class="radio">
 														<label><input type="radio" name="refdet" class="refdet" value="d">Detached</label>
 													</div>
+													
+													<label class="spaced">Unit Indicators</label>
+													<div class="checkbox">
+														<label><input type="checkbox" class="tf">Group / Task Force</label>
+													</div>
+													<div class="checkbox">
+														<label><input type="checkbox" class="fd">Feint / Dummy</label>
+													</div>
 												</div>
+												
 												<div class="col-md-6">
-													<label>Team / Task Force Indicator</label>
-														<div class="checkbox">
-															<label><input type="checkbox">Add Task Force Indicator</label>
-														</div>
-												</div>
-											</div>
-											<div class="row spaced">
-												<div class="col-md-6">
-													<label>Country Indicator</label>
-													<select class="form-control country">
+													<label>HQ / Command Post</label>
+													<select class="form-control headquarters">
 														<option value="false">-- None --</option>
+														<option value="true">Headquarters (No Text)</option>
+														<option value="ctcp">Combat Trains Command Post</option>
+														<option value="cmd">Command Group</option>
+														<option value="eecp">Early Entry Command Post</option>
+														<option value="eoc">Emergency Operations Center</option>
+														<option value="ftcp">Forward Trains Command Post</option>
+														<option value="main">Main Command Post</option>
+														<option value="tac">Tactical Command Post</option>
 													</select>
-												</div>
-												<div class="col-md-6">
-													<label>Feint / Dummy Indicator</label>
-													<div class="checkbox">
-														<label><input type="checkbox">Add Feint Indicator</label>
-													</div>
-												</div>
-											</div>
-											<div class="row spaced">
-												<div class="col-md-6">
-													<label>Unit Designation</label>
-													<input class="form-control unit-designation">
-												</div>
-												<div class="col-md-6">
-													<label>Headquarters Indicator</label>
-													<div class="checkbox">
-														<label><input type="checkbox">Add Headquarters Indicator</label>
-													</div>
-												</div>
-											</div>
-											<div class="row spaced">
-												<div class="col-md-6">
-													<label>Higher Formation</label>
-													<input class="form-control higher-unit">
-												</div>
-												<div class="col-md-6">
-													<label>Combat Effectiveness</label>
-													<select class="form-control country">
+													
+													<label class="spaced">Combat Effectiveness</label>
+													<select class="form-control comeff">
 														<option value="false">-- None --</option>
 														<option value="g">Fully Operational</option>
 														<option value="a">Substantially Operational</option>
 														<option value="r">Marginally Operational</option>
 														<option value="b">Not Operational</option>
 													</select>
-												</div>
-											</div>
-											<div class="row spaced">
-												<div class="col-md-6">
-													<label>Comments / Location</label>
-													<div class="input-group">
-														<input class="form-control comments">
-														<span class="input-group-btn">
-															<button class="btn btn-default" type="button">Grid</button>
-														</span>
-													</div>
-												</div>
-												<div class="col-md-6">
-													<label>Mobility Indicator</label>
-													<select class="form-control">
+													
+													<label class="spaced">Mobility Indicator</label>
+													<select class="form-control mob">
 														<option>-- None --</option>
 													</select>
 												</div>
+											</div>
+											<hr>
+											
+											<label class="spaced">Icon Size</label>
+											<div id="size-slider"></div>
+											<label>Icon Type</label>
+											<div class="radio">
+												<label><input type="radio" name="icon-type" class="icon-type" disabled="disabled" value="color">Full Color</label>
+											</div>
+											<div class="radio">
+												<label><input type="radio" name="icon-type" class="icon-type" checked="checked" value="full">Filled</label>
+											</div>
+											<div class="radio">
+												<label><input type="radio" name="icon-type" class="icon-type" value="min">Minimal</label>
 											</div>
 										</div>
 									</div>
@@ -321,8 +335,44 @@
 								</div>
 							</div>
 						</div>
+						
 						<div id="graphics-canvas-container">
 							<svg id="graphics-canvas"></svg>
+							<div id="unit-small-menu">
+								<div class="top">
+									<h3>Edit Unit <small>(<span class="number">0</span> selected)</small></h3>
+									<button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+								</div>
+								<div class="sub select-one">
+									<label>Unit Designation</label>
+									<input class="form-control unit-designation">
+									
+									<label class="spaced">Higher Formation</label>
+									<input class="form-control higher-unit">
+									
+									<label class="spaced">Comments / Location</label>
+									<div class="input-group">
+										<input class="form-control comments">
+										<span class="input-group-btn">
+											<button class="btn btn-default" type="button">Grid</button>
+										</span>
+									</div>
+								</div>
+								<div class="sub select-many">
+									<label>Unit Designation</label>
+								</div>
+								<div class="bottom">
+									<div class="row">
+										<div class="col-md-6">
+											<button class="btn btn-primary btn-block copy-unit">Copy Unit</button>
+										</div>
+										<div class="col-md-6">
+											<button class="btn btn-danger btn-block delete-unit">Delete Unit</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="grid-reporter"></div>
 						</div>
 					</div>
 				</div>
