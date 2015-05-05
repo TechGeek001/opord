@@ -125,8 +125,6 @@
 
 #unit-small-menu {
 	position: absolute;
-	top: 0;
-	left: 0;
 	z-index: 99;
 	width: 300px;
 	box-shadow: 5px 5px 5px #333;

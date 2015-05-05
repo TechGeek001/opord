@@ -20,6 +20,8 @@ GraphicsBuilder = function(container, w, h) {
 	this.onSelectCallback = null;
 	// User-defined function when a unit is deselected
 	this.offSelectCallback = null;
+	// User-defined function when a unit is being moved
+	this.onSymbolMove = null;
 	
 	// An array of units/equipment
 	this.symbolData = new Array();
@@ -494,9 +496,10 @@ GraphicsBuilder = function(container, w, h) {
 			initialXPos = m.x;
 			initialYPos = m.y;
 			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
-				var t = Controller.getTransformValues(Controller.symbolData[Controller.selectedSymbols[i]].getElement()).translate;
-				originalTranslationX[i] = t ? parseInt(t[0]) : 0;
-				originalTranslationY[i] = t ? parseInt(t[1]) : 0;
+				Controller.selectedSymbols[i] += ""; // TODO CONVERT ALL NUMBERS TO INTS
+				var t = Controller.symbolData[Controller.selectedSymbols[i]].getTransformValues().translate;
+				originalTranslationX[i] = t ? t[0] : 0;
+				originalTranslationY[i] = t ? t[1] : 0;
 			}
 			Controller.moveFunction = Controller.changeUnitPosition;
 			Controller.mouseUpFunction = Controller.releaseUnit;
@@ -522,7 +525,7 @@ GraphicsBuilder = function(container, w, h) {
 					}
 					Controller.removeSelectedSymbol(remove);
 					// User-defined function
-					if(Controller.onSelectCallback) {
+					if(Controller.offSelectCallback) {
 						var array = new Array();
 						for(var j = 0; j < Controller.selectedSymbols.length; j++) {
 							array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
@@ -785,6 +788,14 @@ GraphicsBuilder = function(container, w, h) {
 					// Once the threshhold has been reached, the flag will not reset (must be changed in another function)
 					obj.settings({translate: x + "," + y});
 				}
+			}
+			// User-defined function
+			if(this.onSymbolMove) {
+				var array = new Array();
+				for(var j = 0; j < this.selectedSymbols.length; j++) {
+					array.push(this.symbolData[this.selectedSymbols[j]]);
+				}
+				this.onSymbolMove({symbols: array, xChange: m.x - initialXPos, yChange: m.y - initialYPos});
 			}
 		} else {
 			this.releaseUnit(e);
@@ -1466,6 +1477,7 @@ GraphicsBuilder.prototype.getSymbol = function(i) {
 
 GraphicsBuilder.prototype.removeSymbol = function(i) {
 	if(this.symbolData[i]) {
+		// If the symbol is selected, remove it
 		if(this.selectedSymbols.indexOf(i) != -1) {
 			this.removeSelectedSymbol(i);
 		}
@@ -1481,16 +1493,32 @@ GraphicsBuilder.prototype.addSelectedSymbol = function(i, select) {
 		if(typeof i === "string") {
 			i = new Array(i);
 		}
+		
+		// If select is enabled, remove the current selected units
+		if(typeof select !== "undefined" && select === true) {
+			this.removeSelectedSymbol();
+		}
+		
 		// Iterate through the array of symbols to add
 		for(var j = 0; j < i.length; j++) {
+			i[j] += ""; // TODO CONVERT ALL NUMBERS TO INTS
 			if(this.symbolData[i[j]] && this.selectedSymbols.indexOf(i[j]) == -1) {
 				this.selectedSymbols.push(i[j]);
 			}
+			// If select is enabled, add the needed attributes to the new unit
+			if(typeof select !== "undefined" && select === true) {
+				this.symbolData[i[j]].flags({selected: true}).getElement().setAttribute("data-selected", true);
+			}
 		}
-		// If select, remove the current selection and update it with the symbol(s) just added
-		if(typeof select !== "undefined" && select === true) {
-			this.removeSelectedSymbol();
-			this.symbolData[i].flags({selected: true}).getElement().setAttribute("data-selected", true);
+		
+		// If select is enabled, trigger the user-defined function
+		if(typeof select !== "undefined" && select === true && this.onSelectCallback) {
+			// User-defined function
+			var array = new Array();
+			for(var k = 0; k < this.selectedSymbols.length; k++) {
+				array.push(this.symbolData[this.selectedSymbols[k]]);
+			}
+			this.onSelectCallback(array);
 		}
 	}
 	return this.selectedSymbols;
@@ -1505,17 +1533,20 @@ GraphicsBuilder.prototype.getSelectedSymbols = function() {
 }
 
 GraphicsBuilder.prototype.removeSelectedSymbol = function(i) {
+	console.trace(i);
 	if(typeof i !== "undefined") {
 		if(typeof i === "string") {
 			i = new Array(i);
 		}
 		// Iterate through the array of symbols to remove
 		for(var j = 0; j < i.length; j++) {
+			i[j] += ""; // TODO CONVERT ALL NUMBERS TO INTS
 			if(this.selectedSymbols.indexOf(i[j]) != -1) {
 				this.symbolData[i[j]].flags({selected: false}).getElement().setAttribute("data-selected", false);
 				this.selectedSymbols.splice(this.selectedSymbols.indexOf(i[j]), 1);
 			}
 		}
+		console.log(this.selectedSymbols);
 	} else {
 		for(var i = 0; i < this.selectedSymbols.length; i++) {
 			this.symbolData[this.selectedSymbols[i]].flags({selected: false}).getElement().setAttribute("data-selected", false);

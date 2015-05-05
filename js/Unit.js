@@ -54,6 +54,10 @@ function Unit(id, icn, ech, amplifiers, settings, flags) {
 			// Add back the parentheses
 			if(str) {
 				values[attributes[i]] = str.split(",");
+				// Convert to integers
+				for(var j = 0; j < values[attributes[i]].length; j++) {
+					values[attributes[i]][j] = parseInt(values[attributes[i]][j]);
+				}
 			}
 		}
 		return values;

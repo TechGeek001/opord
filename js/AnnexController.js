@@ -214,20 +214,6 @@ AnnexController.prototype.graphicsControls = function() {
 	});
 	
 	// UNITS CONTROLS
-	
-	
-	var symbolClick = function(e, i) {
-		e.stopPropagation();
-		// Disable the selection that double clicking causes
-		if(document.selection && document.selection.empty) {
-			document.selection.empty();
-		} else if(window.getSelection) {
-			var sel = window.getSelection();
-			sel.removeAllRanges();
-		}
-		toggleSmallUnitPanel(i);
-	}
-	
 	var linkUnitToGrid = function(s) {
 		Controller.G.linkUnitToGrid(s, function() {
 			// TODO CALLBACK
@@ -243,6 +229,12 @@ AnnexController.prototype.graphicsControls = function() {
 	var $unitPreviewCanvas = $unitsPanel.find("svg");
 	var unitPreview = new Unit().settings({scale: startingSize}).draw($unitPreviewCanvas[0]);
 	var selectedUnits = null;
+	
+	// Initially set the small unit panel in the top left
+	$unitSmallMenu.css({
+		"top": 5,
+		"left": 5
+	});
 	
 	// Define the function when a unit is selected and deselected
 	this.G.onSelectCallback = function(u) {
@@ -270,45 +262,82 @@ AnnexController.prototype.graphicsControls = function() {
 		}
 	}
 	
+	this.G.onSymbolMove = function(o) {
+		var averageX = 0;
+		for(var i = 0; i < o.symbols.length; i++) {
+			averageX += o.symbols[i].getTransformValues().translate[0];
+		}
+		averageX = averageX / o.symbols.length;
+		if(averageX <= $canvas.width() / 2) {
+			$unitSmallMenu.css({
+				"right": 5,
+				"left": ""
+			});
+		} else {
+			$unitSmallMenu.css({
+				"left": 5,
+				"right": ""
+			});
+		}
+		
+		var averageY = 0;
+		for(var i = 0; i < o.symbols.length; i++) {
+			averageY += o.symbols[i].getTransformValues().translate[1];
+		}
+		averageY = averageY / o.symbols.length;
+		if(averageY <= $canvas.height() / 2) {
+			$unitSmallMenu.css({
+				"bottom": 5,
+				"top": ""
+			});
+		} else {
+			$unitSmallMenu.css({
+				"top": 5,
+				"bottom": ""
+			});
+		}
+	}
+	
+	// Close the small unit panel and deselect all units
 	$unitSmallMenu.find(".close").click(function() {
 		$unitSmallMenu.hide();
+		Controller.G.removeSelectedSymbol();
 	});
-	
+	// Copy the selected units
 	$unitSmallMenu.find(".copy-unit").click(function() {
 		var newSymbols = new Array();
 		for(var i = 0; i < selectedUnits.length; i++) {
 			newSymbols.push(Controller.G.addSymbol(selectedUnits[i].copy()));
 		};
-		console.log(newSymbols);
+		Controller.G.addSelectedSymbol(newSymbols, true);
 	});
-	
+	// Delete the selected units
 	$unitSmallMenu.find(".delete-unit").click(function() {
-		var s = Controller.G.getSelectedSymbols();
-		for(var i = 0; i < s.length; i++) {
-			Controller.G.removeSymbol(s[i].getElement().getAttribute("data-index"));
+		for(var i = 0; i < selectedUnits.length; i++) {
+			Controller.G.removeSymbol(selectedUnits[i].getElement().getAttribute("data-index"));
 		}
-		toggleSmallUnitPanel();
+		$unitSmallMenu.hide();
 	});
 	// Change the unit designation
 	$unitSmallMenu.find(".unit-designation").on("input", function() {
 		var string = $(this).val();
-		$canvas.find(".selected").each(function() {
-			Controller.G.getSymbol($(this).data("index")).amplifiers({3: string}).draw();
-		});
+		for(var i = 0; i < selectedUnits.length; i++) {
+			selectedUnits[i].amplifiers({3: string}).draw();
+		}
 	});
 	// Change the higher formation
 	$unitSmallMenu.find(".higher-unit").on("input", function() {
 		var string = $(this).val();
-		$canvas.find(".selected").each(function() {
-			Controller.G.getSymbol($(this).data("index")).amplifiers({4: string}).draw();
-		});
+		for(var i = 0; i < selectedUnits.length; i++) {
+			selectedUnits[i].amplifiers({4: string}).draw();
+		}
 	});
 	// Change the comments/location
 	$unitSmallMenu.find(".comments").on("input", function() {
 		var string = $(this).val();
-		$canvas.find(".selected").each(function() {
-			Controller.G.getSymbol($(this).data("index")).amplifiers({5: string}).draw();
-		});
+		for(var i = 0; i < selectedUnits.length; i++) {
+			selectedUnits[i].amplifiers({5: string}).draw();
+		}
 	});
 	
 	// Add all of the options to the select fields
