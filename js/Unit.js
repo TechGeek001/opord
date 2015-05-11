@@ -84,21 +84,31 @@ function Unit(id, icn, ech, amplifiers, settings, flags) {
 		e.setAttributeNS(null, "transform", values.join(" "));
 	}
 	
-	// Check that all of the fields are correct and that the definitions exist
 	this.SVG_GROUP = document.createElementNS("http://www.w3.org/2000/svg", "g");
-	this.identity(id);
-	this.icon(icn);
-	this.echelon(ech);
-	if(typeof amplifiers !== "undefined") {
-		this.amplifiers(amplifiers);
+	// If all of the fields are defined, initialize the object normally
+	if(id && icn && ech) {
+		// Check that all of the fields are correct and that the definitions exist
+		this.identity(id);
+		this.icon(icn);
+		this.echelon(ech);
+		if(typeof amplifiers !== "undefined") {
+			this.amplifiers(amplifiers);
+		}
+		if(typeof settings !== "undefined") {
+			this.settings(settings);
+		}
+		if(typeof flags !== "undefined") {
+			this.flags(flags);
+		}
+	} else if(id) {
+		// Else, if there is only one string given, this is the result of the toString method. Break it apart and initialize
+		this.load(id);
+	} else {
+		// Else, this is an empty unit
+		this.IDENTITY = "0";
+		this.ICON = "000";
+		this.ECHELON = "000";
 	}
-	if(typeof settings !== "undefined") {
-		this.settings(settings);
-	}
-	if(typeof flags !== "undefined") {
-		this.flags(flags);
-	}
-	
 	return this;
 }
 
@@ -215,12 +225,12 @@ Unit.prototype.amplifiers = function(a) {
 						Free text staff comments for information required by the commander. Can also be used for unit
 						location if required.
 						*/
-						if(typeof s == "string") {
-							if(s == "") {
-								this.AMPLIFIERS[i] = null;
-							} else {
-								this.AMPLIFIERS[i] = s;
-							}
+						if(typeof s === "undefined" || s === null || s == "") {
+							this.AMPLIFIERS[i] = null;
+						} else if(typeof s !== "string") {
+							this.AMPLIFIERS[i] = s.toString();
+						} else {
+							this.AMPLIFIERS[i] = s;
 						}
 						break;
 					case(7):
@@ -244,6 +254,12 @@ Unit.prototype.amplifiers = function(a) {
 						*/
 						if(typeof s === "boolean") {
 							this.AMPLIFIERS[i] = s;
+						} else if(typeof s === "string") {
+							if(s == "true") {
+								this.AMPLIFIERS[i] = true;
+							} else if(s == "false") {
+								this.AMPLIFIERS[i] = false;
+							}
 						}
 						break;
 					
@@ -255,7 +271,13 @@ Unit.prototype.amplifiers = function(a) {
 						multiple unit locations and headquarters. (See figure 4-3 on page 4-11.)
 						*/
 						if(typeof s.a === "boolean") {
-							this.AMPLIFIERS[i] = s;
+							this.AMPLIFIERS[i] = s.a;
+						} else if(typeof s.a === "string") {
+							if(s.a == "true") {
+								this.AMPLIFIERS[i] = true;
+							} else if(s.a == "false") {
+								this.AMPLIFIERS[i] = false;
+							}
 						}
 						break;
 					case(11):
@@ -901,11 +923,11 @@ Unit.prototype.draw = function(canvas) {
 		
 		// Add in transformation options
 		this.setTransformValues(this.SVG_GROUP);
-		
-		if(typeof canvas !== "undefined") {
-			canvas.appendChild(this.SVG_GROUP);
-		}
 	}
+	if(typeof canvas !== "undefined") {
+		canvas.appendChild(this.SVG_GROUP);
+	}
+	this.load(this.toString());
 	return this;
 }
 
@@ -916,8 +938,70 @@ Unit.prototype.getElement = function() {
 
 // Export the unit into a shorthand string
 Unit.prototype.toString = function() {
-	var str = "TODO";
-	return str;
+	var amplifierArr = new Array();
+	for(var i = 1; i <= 14; i++) {
+		if(i != 6 && this.AMPLIFIERS[i] !== null && this.AMPLIFIERS[i] !== false) {
+			if(typeof this.AMPLIFIERS[i].a === "undefined") {
+				amplifierArr.push(i + ":" + this.AMPLIFIERS[i]);
+			} else {
+				var subArr = new Array();
+				for(var k in this.AMPLIFIERS[i]) {
+					if(this.AMPLIFIERS[i][k] !== null) {
+						subArr.push(k + ":" + this.AMPLIFIERS[i][k]);
+					}
+				}
+				if(subArr.length > 0) {
+					amplifierArr.push(i + ":" + subArr.join(";"));
+				}
+			}
+		}
+	}
+	var amplifierStr = amplifierArr.join(";");
+	var settingsArr = new Array();
+	for(var k in this.SETTINGS) {
+		if(this.SETTINGS[k] !== false) {
+			settingsArr.push(k + ":" + this.SETTINGS[k]);
+		}
+	}
+	var settingsStr = settingsArr.join(";");
+	var arr = new Array(
+		this.IDENTITY + this.ICON + this.ECHELON,
+		amplifierStr,
+		settingsStr
+	);
+	return arr.join("|");
+}
+
+// Import the unit from the toString()
+Unit.prototype.load = function(str) {
+	arr = str.split("|");
+	var id = arr[0].substr(0, 1);
+	var icn = arr[0].substr(1, 3);
+	var ech = arr[0].substr(4, 3);
+	var amplifierStr = arr[1];
+	var settingsStr = arr[2];
+	this.identity(id);
+	this.icon(icn);
+	this.echelon(ech);
+	var amplifierArr = amplifierStr.split(";");
+	var o = {};
+	for(var i = 0; i < amplifierArr.length; i++) {
+		var arr = amplifierArr[i].split(":");
+		var k = arr[0];
+		var v = !isNaN(arr[1]) ? parseFloat(arr[1]) : arr[1];
+		o[k] = v;
+	}
+	this.amplifiers(o);
+	var settingsArr = settingsStr.split(";");
+	o = {};
+	for(var i = 0; i < settingsArr.length; i++) {
+		var arr = settingsArr[i].split(":");
+		var k = arr[0];
+		var v = !isNaN(arr[1]) ? parseFloat(arr[1]) : arr[1];
+		o[k] = v;
+	}
+	this.settings(o);
+	return this;
 }
 
 // Make a duplicate of this unit
@@ -935,6 +1019,9 @@ Unit.prototype.copy = function() {
 // Unit Identity Definitions
 Unit.prototype.identities = function(id) {
 	var identities = {
+		"0": {
+			title: "-- None --"
+		},
 		"f": {
 			title: "Friendly",
 			color: "blue",
@@ -1017,6 +1104,10 @@ Unit.prototype.translate = function(x, y, add) {
 // Unit Icon Definitions
 Unit.prototype.icons = function(icn) {
 	var icons = {
+		"000": {
+			title: "-- None --",
+			type: "unit"
+		},
 		"adm": {
 			title: "Administrative",
 			type: "unit"
@@ -1264,7 +1355,7 @@ Unit.prototype.icons = function(icn) {
 // Unit Size Definitions
 Unit.prototype.echelons = function(ech) {
 	var echelons = {
-		"none": {
+		"000": {
 			title: "-- None --"
 		},
 		"tmc": {

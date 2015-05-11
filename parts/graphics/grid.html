@@ -1,0 +1,108 @@
+<div class="modal-dialog modal-lg">
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h2 class="modal-title">Grid Lines</h2>
+		</div>
+		<div class="modal-body">
+			<div class="row">
+				<div class="col-md-9">
+					<div class="g1 alert alert-default" data-gridtype="1">
+						<h4>Point and Adjacent Line <span style="display: none;" class="pull-right glyphicon glyphicon-ok"></span></h4>
+						<p><i>Use this option if you know the location of a grid line intersection on the image, as well as the grid line immediately above, below, left, or right of the intersection. This is useful if you are referencing existing graphics.</i></p>
+						<div class="row">
+							<div class="col-md-6">
+								<input type="text" class="form-control" placeholder="four or six digit grid">
+							</div>
+						</div>
+					</div>
+					<div class="g2 alert alert-default" data-gridtype="2">
+						<h4>Two Points <span style="display: none;" class="pull-right glyphicon glyphicon-ok"></span></h4>
+						<p><i>Use this option if you know where two eight digit grids are located on the image. Note that using this method has a margin of error of 10 meters and will not produce perfect results.</i></p>
+						<div class="row">
+							<div class="col-md-6">
+								<input type="text" class="form-control" placeholder="four, six, or eight digit grid">
+							</div>
+							<div class="col-md-6">
+								<input type="text" class="form-control" placeholder="four, six, or eight digit grid">
+							</div>
+						</div>
+					</div>
+					<div class="g3 alert alert-default" data-gridtype="3">
+						<h4>Point and Distance <span style="display: none;" class="pull-right glyphicon glyphicon-ok"></span></h4>
+						<p><i>Use this option if you know where an eight digit grid is located on the image, as well as a straight-line distance (e.g. a road or trench line). Note that using this method has a margin of error of 10 meters and will not produce perfect results.</i></p>
+						<div class="row">
+							<div class="col-md-6">
+								<input type="text" class="form-control" placeholder="four, six, or eight digit grid">
+							</div>
+							<div class="col-md-3">
+								<input type="text" class="form-control" placeholder="distance">
+							</div>
+							<div class="col-md-3">
+								<select class="form-control distance-unit">
+									<option value="m">m (meters)</option>
+									<option value="km">km (kilometers)</option>
+									<option value="ft">ft (feet)</option>
+									<option value="yd">yd (yards)</option>
+									<option value="mi">mi (miles)</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<hr>
+					<div class="radio">
+						<label><input type="radio" name="grid-accuracy" class="grid-accuracy" value="4" checked="checked"> Accurate to 4 digits</label>
+						<label><input type="radio" name="grid-accuracy" class="grid-accuracy" value="6"> Accurate to 6 digits</label>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<p class="text-label">4-Digit Line Color</p>
+					<div class="graphics-colors-container">
+						<div class="graphics-color-selected" style="background-color: black;"></div>
+						<div class="graphics-color-bar">
+							<div class="item selected" style="background-color: black;"></div>
+							<div class="item" style="background-color: gray;"></div>
+						</div>
+					</div>
+					<p class="text-label">6-Digit Line Color</p>
+					<div class="graphics-colors-container">
+						<div class="graphics-color-selected" style="background-color: gray;"></div>
+						<div class="graphics-color-bar">
+							<div class="item" style="background-color: black;"></div>
+							<div class="item selected" style="background-color: gray;"></div>
+						</div>
+					</div>
+					<p class="text-label">Grid Zone Line Color</p>
+					<div class="graphics-colors-container">
+					<div class="graphics-color-selected" style="background-color: red;"></div>
+						<div class="graphics-color-bar">
+							<div class="item" style="background-color: black;"></div>
+							<div class="item" style="background-color: gray;"></div>
+							<div class="item selected" style="background-color: red;"></div>
+							<div class="item" style="background-color: blue;"></div>
+						</div>
+					</div>
+					<p class="text-label">4-Digit Marker Color</p>
+					<div class="graphics-colors-container">
+						<div class="graphics-color-selected" style="background-color: yellow;"></div>
+						<div class="graphics-color-bar">
+							<div class="item selected" style="background-color: yellow;"></div>
+							<div class="item" style="background-color: #EEE;"></div>
+						</div>
+					</div>
+					<p class="text-label">6-Digit Marker Color</p>
+					<div class="graphics-colors-container">
+						<div class="graphics-color-selected" style="background-color: #EEE;"></div>
+						<div class="graphics-color-bar">
+							<div class="item" style="background-color: yellow;"></div>
+							<div class="item selected" style="background-color: #EEE;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-primary create-grid">Create Grid</button>
+		</div>
+	</div>
+</div>

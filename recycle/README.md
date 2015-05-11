@@ -1,7 +1,5 @@
-# US Army Operations Order / Graphics Shell
+# US Army Operations Order Builder
 
-Purpose
---------------
 The purpose of this project is to give junior officers an easy to use application for creating OPORDs to standard. Additionally, it provides an easy-to-use interface for creating operational graphics.
 
 Basic Graphics Tutorial

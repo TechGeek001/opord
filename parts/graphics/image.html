@@ -1,0 +1,111 @@
+<div class="modal-dialog modal-lg">
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h2 class="modal-title">Background Image</h2>
+		</div>
+		<div class="modal-body">
+			<div class="row">
+				<div class="col-md-4">
+					<div class="alert alert-default">
+						<h4>Choose an Existing Image</h4>
+						<label>Select from the images below...</label>
+						<select class="form-control existing-image">
+							<option value="galloway.png">Galloway Range, Ft Benning GA</option>
+							<option value="omaha.png">Omaha Beach, Normandy, France</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-md-8">
+					<div class="alert alert-default">
+						<h4>Upload a New Image</h4>
+						<div class="row">
+							<div class="col-md-5">
+								<label>Choose a file to upload...</label>
+								<input type="file" class="form-control new-image">
+							</div>
+							<div class="col-md-7">
+								<label>...and give it a name</label>
+								<div class="row">
+									<div class="col-md-8">
+										<input type="text" class="form-control new-image-name">
+									</div>
+									<div class="col-md-4">
+										<button class="btn btn-default btn-block">Upload</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-8">
+					<div id="background-preview-container">
+						<svg id="background-preview" viewBox="0 0 1138 853"></svg>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="alert alert-default image-controls">
+						<div class="row">
+							<div class="col-md-6">
+								<label>Horizontal Position</label>
+								<div class="input-group">
+									<span class="input-group-btn left">
+										<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-arrow-left"></span></button>
+									</span>
+									<input type="text" class="form-control x-position" value="0">
+									<span class="input-group-btn right">
+										<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-arrow-right"></span></button>
+									</span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<label>Vertical Position</label>
+								<div class="input-group">
+									<span class="input-group-btn">
+										<button class="btn btn-default up" type="button"><span class="glyphicon glyphicon-arrow-up"></span></button>
+									</span>
+									<input type="text" class="form-control y-position" value="0">
+									<span class="input-group-btn">
+										<button class="btn btn-default down" type="button"><span class="glyphicon glyphicon-arrow-down"></span></button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="row spaced">
+							<div class="col-md-6">
+								<label>Image Rotation</label>
+								<div class="input-group">
+									<span class="input-group-btn">
+										<button class="btn btn-default rotate-left" type="button"><span class="glyphicon glyphicon-minus"></span></button>
+									</span>
+									<input type="text" class="form-control rotation" value="0">
+									<span class="input-group-btn">
+										<button class="btn btn-default rotate-right" type="button"><span class="glyphicon glyphicon-plus"></span></button>
+									</span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<label>Image Size</label>
+								<div class="input-group">
+									<span class="input-group-btn">
+										<button class="btn btn-default scale-down" type="button"><span class="glyphicon glyphicon-zoom-out"></span></button>
+									</span>
+									<input type="text" class="form-control scale" value="1.00">
+									<span class="input-group-btn">
+										<button class="btn btn-default scale-up" type="button"><span class="glyphicon glyphicon-zoom-in"></span></button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<p><i>If you see any pink shading on the edges of your image, it means that the image does not completely cover the canvas. Change the position, or increase the size of the image to correct this.</i></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-primary change-image">Change Image</button>
+		</div>
+	</div>
+</div>

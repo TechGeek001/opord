@@ -29,6 +29,15 @@
 	z-index: 999;
 }
 
+#annex-builder .help-label {
+	float: right;
+	margin-top: 2px;
+}
+
+#annex-builder .alert.help {
+	margin: 0 0 10px 0;
+}
+
 #annex-builder-background {
 	position: fixed;
 	width: 100%;
@@ -43,6 +52,7 @@
 	position: absolute;
 	top: 40px;
 	border: 1px solid black;
+	cursor: default;
 }
 
 #annex-builder #graphics-canvas #symbol-layer g {

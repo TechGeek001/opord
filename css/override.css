@@ -1,10 +1,28 @@
-.alert {
-	margin-top: 20px;
-	margin-bottom: 20px;
+h3, h4 {
+	margin-top: 0;
+}
+
+.alert.alert-default {
+	color: black;
+	background-color: #EEE;
+	border-color: #e5e5e5;
+}
+
+.alert p {
+	margin-bottom: 10px;
+}
+
+.alert small {
+	color: inherit;
 }
 
 .btn {
 	text-align: left;
+}
+
+.input-group-btn .btn .glyphicon {
+	font-size: 12px;
+	line-height: 20px;
 }
 
 .dropdown-menu li.active a, .dropdown-menu li.active:hover a {
@@ -20,7 +38,7 @@
 	padding-left: 30px;
 }
 
-input[type="text"] {
+input[type="text"], input[type="file"], select {
 	margin-bottom: 10px;
 }
 
@@ -30,6 +48,30 @@ input[type="text"] {
 
 .glyphicon.green {
 	color: green;
+}
+
+.modal-content {
+	background-color: #EEE;
+}
+
+.modal-body {
+	background-color: white;
+}
+
+.modal-header {
+	padding: 10px 15px;
+}
+
+.modal-footer {
+	padding: 5px;
+}
+
+.modal-title {
+	font-size: 26px;
+}
+
+.modal-lg {
+	width: 1100px;
 }
 
 .navbar-text.text-success {

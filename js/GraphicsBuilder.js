@@ -88,6 +88,47 @@ GraphicsBuilder = function(container, w, h) {
 	}
 	
 	/**
+	 * Draw a line from x1y1 to x2y2
+	 * 
+	 * @method drawRect
+	 * @param {Number} x			The X coordinate for the top left corner
+	 * @param {Number} y			The Y coordinate for the top left corner
+	 * @param {Number} w			The width
+	 * @param {Number} h			The height
+	 * @param {Object} o			Extra options
+	 * @return {Object}				The resulting DOM object
+	 */
+	this.drawRect = function(x, y, w, h, o) {
+		if(typeof o === "undefined") {
+			o = {};
+		}
+		var r = document.createElementNS(this.xmlns, "rect");
+		r.setAttributeNS(null, "x", x);
+		r.setAttributeNS(null, "y", y);
+		r.setAttributeNS(null, "width", w);
+		r.setAttributeNS(null, "height", h);
+		if(typeof o.fill !== "undefined") {
+			r.setAttributeNS(null, "fill", o.fill);
+		}
+		if(typeof o.fillOpacity !== "undefined") {
+			r.setAttributeNS(null, "fill-opacity", o.fillOpacity);
+		}
+		if(typeof o.stroke !== "undefined") {
+			r.setAttributeNS(null, "stroke", o.stroke);
+		}
+		if(typeof o.dasharray !== "undefined") {
+			r.setAttributeNS(null, "stroke-dasharray", o.dasharray);
+		}
+		if(typeof o.dashoffset !== "undefined") {
+			r.setAttributeNS(null, "stroke-dashoffset", o.dashoffset);
+		}
+		if(typeof o.rotate !== "undefined") {
+			r.setAttributeNS(null, "transform", "rotate(" + o.rotate + ")");
+		}
+		return r;
+	}
+	
+	/**
 	 * Draw a circle centered on x,y with a radius of r
 	 * 
 	 * @method drawCircle
@@ -177,7 +218,7 @@ GraphicsBuilder = function(container, w, h) {
 				if(coord == 0) {
 					var circleColor = grid4Color;
 					var lineColor = line0Color;
-				} else if(gridAccuracy == 6 && coord % 100 != 0) {
+				} else if(gridAccuracy == 6 && coord % 10 != 0) {
 					var circleColor = grid6Color;
 					var lineColor = line6Color;
 				} else {
@@ -192,14 +233,22 @@ GraphicsBuilder = function(container, w, h) {
 						var coordString = coord + "";
 					}
 				} else if(gridAccuracy == 6) {
-					if(coord < 10) {
-						// Convert "01" to "001"
-						var coordString = "00" + coord;
-					} else if(coord < 100) {
-						// Convert "99" to "099"
-						var coordString = "0" + coord;
+					if(coord % 10 == 0) {
+						var coordString = coord / 10 + "";
+						if(coord / 10 < 10) {
+							// Convert "1" to "01"
+							var coordString = "0" + coordString;
+						}
 					} else {
-						var coordString = coord + "";
+						if(coord < 10) {
+							// Convert "01" to "001"
+							var coordString = "00" + coord;
+						} else if(coord < 100) {
+							// Convert "99" to "099"
+							var coordString = "0" + coord;
+						} else {
+							var coordString = coord + "";
+						}
 					}
 				}
 				// This is an X coordinate
@@ -239,6 +288,10 @@ GraphicsBuilder = function(container, w, h) {
 				create[i] += size;
 			}
 		}
+		// Reset the GraphicsBuilder mouse functions used by the grids
+		this.moveFunction = null;
+		this.clickFunction = null;
+		this.canDrag = true;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,29 +419,40 @@ GraphicsBuilder = function(container, w, h) {
 			var distance = "vertical";
 		}
 		// Figure out what the pixels/1km conversion is
-		var x = mp.x;
-		if(x > initialXPos) {
-			if(mp.y > initialYPos) {
-				diff = diff / gridData[3][distance];
+		var changeX = mp.x - initialXPos;
+		var changeY = mp.y - initialYPos;
+		if(crosshairConstrainQ1 != 0 && crosshairConstrainQ1 != Infinity) {
+			// Quadrant 1
+			if(mp.x > initialXPos && mp.y < initialYPos) {
+				var quadrantIndex = 0;
+			// Quadrant 2
+			} else if(mp.x < initialXPos && mp.y < initialYPos) {
+				var quadrantIndex = 1;
+			// Quadrant 3
+			} else if(mp.x < initialXPos && mp.y > initialYPos) {
+				var quadrantIndex = 2;
+			// Quadrant 4
 			} else {
-				diff = diff / gridData[0][distance];
+				var quadrantIndex = 3;
 			}
+			// Normal change
+			if(Math.abs(changeX) > Math.abs(changeY)) {
+				var diff = Math.abs(changeX / gridData[quadrantIndex]["horizontal"]);
+			} else {
+				var diff = Math.abs(changeY / gridData[quadrantIndex]["vertical"]);
+			}
+		} else if(crosshairConstrainQ1 == Infinity) {
+			// No change in X
+			var diff = Math.abs(changeY / gridData[0]["vertical"]);
 		} else {
-			if(mp.y > initialYPos) {
-				diff = diff / gridData[2][distance];
-			} else {
-				diff = diff / gridData[1][distance];
-			}
+			// No change in Y
+			var diff = Math.abs(changeX / gridData[0]["horizontal"]);
 		}
 		// Ensure that the minimum width is met
 		var multiplier = gridAccuracy == 4 ? 1000 : 100;
 		if(diff * multiplier >= minGridSize + minGridSizeBuffer) {
 			// Find the closest solid grid coordinates (4 or 6 digits)
 			this.findClosestGrids(diff);
-			// Null out the move and click functions
-			this.moveFunction = null;
-			this.clickFunction = null;
-			this.canDrag = true;
 			// Remove the grid lines
 			this.gridLayer.removeChild(crosshairX);
 			this.gridLayer.removeChild(crosshairY);
@@ -474,10 +538,6 @@ GraphicsBuilder = function(container, w, h) {
 		if(diff * multiplier >= minGridSize + minGridSizeBuffer) {
 			// Find the closest solid grid coordinates (4 or 6 digits)
 			this.findClosestGrids(diff);
-			// Null out the move and click functions
-			this.moveFunction = null;
-			this.clickFunction = null;
-			this.canDrag = true;
 			// Calculate the left and top-most grid line positions (pixels) and draw the grid
 			this.completeGridCalc(diff);
 		}
@@ -487,12 +547,14 @@ GraphicsBuilder = function(container, w, h) {
 	// PROTECTED MOUSE-DOWN FUNCTIONS
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
+	var selectBox = null;
+	
 	this.moveUnit = function(e) {
 		e.stopPropagation();
 		// Because this function is referenced by the unit, the Controller variable is used to refer to the GraphicsBuilder
 		if(Controller.canDrag && e.which == 1) {
-			Controller.dragging = true;
 			var m = Controller.mousePosition(e);
+			Controller.dragging = true;
 			initialXPos = m.x;
 			initialYPos = m.y;
 			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
@@ -524,16 +586,24 @@ GraphicsBuilder = function(container, w, h) {
 						}
 					}
 					Controller.removeSelectedSymbol(remove);
-					// User-defined function
-					if(Controller.offSelectCallback) {
-						var array = new Array();
-						for(var j = 0; j < Controller.selectedSymbols.length; j++) {
-							array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
-						}
-						Controller.offSelectCallback(array);
-					}
 				}
 			}
+		}
+	}
+	
+	this.selectionBoxMouseDown = function(e) {
+		if(e.which == 1) {
+			if(selectBox) {
+				Controller.releaseSelectionBox(e);
+			}
+			Controller.dragging = true;
+			var m = Controller.mousePosition(e);
+			initialXPos = m.x;
+			initialYPos = m.y;
+			Controller.moveFunction = Controller.drawSelectionBox;
+			Controller.mouseUpFunction = Controller.releaseSelectionBox;
+			selectBox = Controller.drawRect(initialXPos, initialYPos, 1, 1, {fill: "gray", stroke: "gray", strokeWidth: 2, fillOpacity: "0.5"});
+			Controller.symbolLayer.appendChild(selectBox);
 		}
 	}
 	
@@ -543,9 +613,9 @@ GraphicsBuilder = function(container, w, h) {
 	
 	this.releaseUnit = function(e) {
 		if(e.which == 1) {
-			this.dragging = false;
-			this.moveFunction = null;
-			this.mouseUpFunction = null;
+			Controller.dragging = false;
+			Controller.moveFunction = null;
+			Controller.mouseUpFunction = null;
 			originalTranslationX = new Array();
 			originalTranslationY = new Array();
 		}
@@ -603,30 +673,22 @@ GraphicsBuilder = function(container, w, h) {
 								}
 							}
 							Controller.removeSelectedSymbol(remove);
-							// User-defined function
-							if(Controller.offSelectCallback) {
-								var array = new Array();
-								for(var j = 0; j < Controller.selectedSymbols.length; j++) {
-									array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
-								}
-								Controller.offSelectCallback(array);
-							}
 						} else {
 							// If the shift key is held down, or there are not multiple symbols selected, deselect this symbol (if multiple, all others will remain selected)
 							Controller.removeSelectedSymbol(i);
-							// User-defined function
-							if(Controller.offSelectCallback) {
-								var array = new Array();
-								for(var j = 0; j < Controller.selectedSymbols.length; j++) {
-									array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
-								}
-								Controller.offSelectCallback(array);
-							}
 						}
 					}
 				}
 			}
 		}
+	}
+	
+	this.releaseSelectionBox = function(e) {
+		Controller.dragging = false;
+		Controller.symbolLayer.removeChild(selectBox);
+		selectBox = null;
+		Controller.moveFunction = null;
+		Controller.mouseUpFunction = null;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -645,6 +707,8 @@ GraphicsBuilder = function(container, w, h) {
 	var crosshairConstrainQ2 = 0;
 	var crosshairConstrainQ3 = 0;
 	var crosshairConstrainQ4 = 0;
+	var projectedX = 0;
+	var projectedY = 0;
 	
 	/**
 	 * Create a crosshair effect that follows the user's cursor
@@ -685,22 +749,42 @@ GraphicsBuilder = function(container, w, h) {
 			this.gridLayer.appendChild(crosshairY);
 		}
 		// Update the crosshair positions
-		
 		var mp = this.mousePosition(e);
-		var x = mp.x
-		if(x > initialXPos) {
-			if(mp.y > initialYPos) {
-				var y = initialYPos - ((x - initialXPos) * crosshairConstrainQ4);
+		
+		if(crosshairConstrainQ1 != 0 && crosshairConstrainQ1 != Infinity) {
+			// Quadrant 1
+			if(mp.x > initialXPos && mp.y < initialYPos) {
+				var slope = crosshairConstrainQ1;
+			// Quadrant 2
+			} else if(mp.x < initialXPos && mp.y < initialYPos) {
+				var slope = crosshairConstrainQ2;
+			// Quadrant 3
+			} else if(mp.x < initialXPos && mp.y > initialYPos) {
+				var slope = crosshairConstrainQ3;
+			// Quadrant 4
 			} else {
-				var y = initialYPos - ((x - initialXPos) * crosshairConstrainQ1);
+				var slope = crosshairConstrainQ4;
 			}
+			var changeX = mp.x - initialXPos;
+			var changeY = mp.y - initialYPos;
+			// Normal change
+			if(Math.abs(changeX) > Math.abs(changeY)) {
+				var x = initialXPos + changeX;
+				var y = initialYPos - (changeX * slope);
+			} else {
+				var y = initialYPos + changeY;
+				var x = initialXPos - (changeY / slope);
+			}
+		} else if(crosshairConstrainQ1 == Infinity) {
+			// No change in X
+			var x = initialXPos;
+			var y = mp.y;
 		} else {
-			if(mp.y > initialYPos) {
-				var y = initialYPos - ((x - initialXPos) * crosshairConstrainQ3);
-			} else {
-				var y = initialYPos - ((x - initialXPos) * crosshairConstrainQ2);
-			}
+			// No change in Y
+			var y = initialYPos;
+			var x = mp.x;
 		}
+		
 		crosshairX.setAttributeNS(null, "y1", y);
 		crosshairX.setAttributeNS(null, "y2", y);
 		crosshairY.setAttributeNS(null, "x1", x);
@@ -795,10 +879,67 @@ GraphicsBuilder = function(container, w, h) {
 				for(var j = 0; j < this.selectedSymbols.length; j++) {
 					array.push(this.symbolData[this.selectedSymbols[j]]);
 				}
-				this.onSymbolMove({symbols: array, xChange: m.x - initialXPos, yChange: m.y - initialYPos});
+				this.onSymbolMove({symbols: array, mouse: {x: m.x, y: m.y}});
 			}
 		} else {
 			this.releaseUnit(e);
+		}
+	}
+	
+	this.drawSelectionBox = function(e) {
+		if(this.canDrag && this.dragging) {
+			var m = this.mousePosition(e);
+			var x = m.x;
+			var y = m.y;
+			var selectWidth = x - initialXPos;
+			var selectHeight = y - initialYPos;
+			if(selectWidth > 0) {
+				var x1 = initialXPos;
+				var x2 = initialXPos + selectWidth;
+				selectBox.setAttribute("width", selectWidth);
+			} else {
+				selectWidth = Math.abs(selectWidth);
+				var x1 = initialXPos - selectWidth;
+				var x2 = initialXPos;
+				selectBox.setAttribute("x", initialXPos - selectWidth);
+				selectBox.setAttribute("width", selectWidth);
+			}
+			if(selectHeight > 0) {
+				var y1 = initialYPos;
+				var y2 = initialYPos + selectHeight;
+				selectBox.setAttribute("height", selectHeight);
+			} else {
+				selectHeight = Math.abs(selectHeight);
+				var y1 = initialYPos - selectHeight;
+				var y2 = initialYPos;
+				selectBox.setAttribute("y", initialYPos - selectHeight);
+				selectBox.setAttribute("height", selectHeight);
+			}
+			// Iterate through all the symbols and select the ones that are within the bounding box
+			var selected = new Array();
+			for(var i = 0; i < this.symbolData.length; i++) {
+				if(Controller.symbolData[i]) {
+					var s = Controller.symbolData[i].getTransformValues().translate;
+					if(typeof s === "undefined") {
+						s = new Array(0, 0);
+					}
+					if(s[0] >= x1 && s[0] <= x2 && s[1] >= y1 && s[1] <= y2) {
+						selected.push(i);
+					}
+				}
+			}
+			this.addSelectedSymbol(selected, true);
+			// If something was selected, call the user-defined function
+			if(selected.length > 0) {
+			// User-defined function
+				if(Controller.onSelectCallback) {
+					var array = new Array();
+					for(var j = 0; j < Controller.selectedSymbols.length; j++) {
+						array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+					}
+					Controller.onSelectCallback(array);
+				}
+			}
 		}
 	}
 	
@@ -998,7 +1139,7 @@ GraphicsBuilder = function(container, w, h) {
 	/**
 	 * Update the transform attribute because it has multiple properties. Setting a sub-attribute to false will remove it
 	 */
-	this.updateTransformValues = function(e, o) {
+	this.setTransformValues = function(e, o) {
 		var atrString = e.getAttribute("transform") ? e.getAttribute("transform") : "";
 		var attributes = new Array("translate", "rotate", "scale", "skew", "matrix");
 		var values = new Array();
@@ -1009,8 +1150,11 @@ GraphicsBuilder = function(container, w, h) {
 			// Update with the new value
 			var str = typeof o[attributes[i]] !== "undefined" ? o[attributes[i]] : str;
 			// Add back the parentheses
-			if(str) {
+			if(str !== false) {
+				console.log(attributes[i], str);
 				values.push(attributes[i] + "(" + str + ")");
+			} else {
+				console.log("no", attributes[i], str);
 			}
 		}
 		e.setAttributeNS(null, "transform", values.join(" "));
@@ -1041,24 +1185,23 @@ GraphicsBuilder = function(container, w, h) {
 		console.error("Canvas element doesn't exist. Got " + document.getElementById(container) + " when looking for \"#" + container + "\".");
 	}
 	
-	// Set the click functionality
-	this.container.addEventListener("click", function(e) {
-		if(Controller.clickFunction && e.which == 1) {
-			Controller.clickFunction(e);
-		}
-		if(Controller.selectedSymbols.length > 0) {
-			// Manually deselect all selected symbols
-			for(var i = 0; i < Controller.selectedSymbols.length; i++) {
-				Controller.symbolData[Controller.selectedSymbols[i]].flags({selected: false, dragged: false}).getElement().setAttribute("data-selected", false);
+	// Set the mousedown functionality
+	this.container.addEventListener("mousedown", function(e) {
+		if(e.which == 1) {
+			e.preventDefault();
+			e.stopPropagation();
+			// If there is a function defined, use it - else, use the default selection box
+			if(Controller.clickFunction) {
+				Controller.clickFunction(e);
+			} else {
+				Controller.selectionBoxMouseDown(e);
 			}
-			Controller.removeSelectedSymbol();
-			// User-defined function
-			if(Controller.offSelectCallback) {
-				var array = new Array();
-				for(var j = 0; j < Controller.selectedSymbols.length; j++) {
-					array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
+			if(Controller.selectedSymbols.length > 0) {
+				// Manually deselect all selected symbols
+				for(var i = 0; i < Controller.selectedSymbols.length; i++) {
+					Controller.symbolData[Controller.selectedSymbols[i]].flags({selected: false, dragged: false}).getElement().setAttribute("data-selected", false);
 				}
-				Controller.offSelectCallback(array);
+				Controller.removeSelectedSymbol();
 			}
 		}
 	});
@@ -1074,6 +1217,13 @@ GraphicsBuilder = function(container, w, h) {
 	this.container.addEventListener("mouseup", function(e) {
 		if(Controller.mouseUpFunction && e.which == 1) {
 			Controller.mouseUpFunction(e)
+		}
+	});
+	
+	// Set the mouseout functionality
+	this.container.addEventListener("mouseout", function(e) {
+		if(Controller.mouseOutFunction) {
+			Controller.mouseOutFunction(e)
 		}
 	});
 	
@@ -1151,11 +1301,6 @@ GraphicsBuilder = function(container, w, h) {
 		moveDirection = null;
 		numberOfMoves = 0;
 	});
-	
-	// Set the mouseout functionality
-	this.container.addEventListener("mouseout", function(e) {
-		
-	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1168,13 +1313,113 @@ GraphicsBuilder = function(container, w, h) {
  */
 GraphicsBuilder.prototype.setImage = function(x, y, w, h, scale, src) {
 	this.bgData.e = this.drawImage(x, y, w, h, scale, src);
-	// Ensure that this is always on the bottom of the stack
-	this.imageLayer.insertBefore(this.bgData.e, this.gridLayer.firstChild);
+	this.imageLayer.innerHTML = "";
+	// Append the element
+	this.imageLayer.appendChild(this.bgData.e);
+}
+
+GraphicsBuilder.prototype.moveImage = function(x, y, add) {
+	if(typeof add === "undefined") {
+		add = false;
+	}
+	if(typeof x !== "undefined" && x !== false) {
+		var o = add ? parseFloat(this.bgData.e.getAttribute("x")) + x : x;
+		this.bgData.e.setAttribute("x", o);
+	}
+	if(typeof y !== "undefined" && y !== false) {
+		var o = add ? parseFloat(this.bgData.e.getAttribute("y")) + y : y;
+		this.bgData.e.setAttribute("y", o);
+	}
+}
+
+GraphicsBuilder.prototype.scaleImage = function(s) {
+	if(typeof s !== "undefined" && s > 0) {
+		this.setTransformValues(this.bgData.e, {"scale": s});
+	}
+}
+
+GraphicsBuilder.prototype.rotateImage = function(s) {
+	if(typeof s !== "undefined" && s >= -360 && s <= 360) {
+		this.setTransformValues(this.bgData.e, {"rotate": s});
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // GRID FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @method checkGridValues
+ * Checks the grid data entered for correctness
+ * Result codes: 0=success, 1=missing parameter, 2=malformed value
+ * 
+ * @param type		{Integer}					The mode to use for this grid (1-3)
+ * @param i1		{String}					The first grid (4-digit or 6-digit if type=1 || 8-digit if type=2 or type=3)
+ * @param i2		{String|Integer}			The second grid if type=2 || The known distance if type=35
+ * @param i3		{String}					The known distance units if type=35
+ * @return			{Object}					The result code and the properly formatted data
+ */
+GraphicsBuilder.prototype.checkGridValues = function(type, i1, i2, i3) {
+	type = typeof type !== "undefined" && type >= 1 && type <= 3 ? type : 0;
+	var obj = {
+		success: true,
+		code: 0,
+		data: new Array()
+	};
+	// CHECK THE FIRST VALUE (TYPES 1-3)
+	if(type > 0) {
+		if(typeof i1 === "undefined" || i1 == "") {
+			obj.data[0] = null;
+		} else if(isNaN(i1) || (i1.length != 4 && i1.length != 6 && i1.length != 8)) {
+			obj.data[0] = false;
+		} else {
+			obj.data[0] = i1;
+		}
+	}
+	// CHECK THE SECOND VALUE (TYPES 2 & 3)
+	if(type > 1) {
+		if(typeof i2 === "undefined" || i2 == "") {
+			obj.data[1] = null;
+		} else if(isNaN(i2)) {
+			obj.data[1] = false;
+		} else if(type == 2 && ((i2.length != 4 && i2.length != 6 && i2.length != 8) || (parseInt(i2) == parseInt(i1)))) {
+			obj.data[1] = false;
+		} else if(type == 3 && i2 <= 0) {
+			obj.data[1] = false;
+		} else {
+			obj.data[1] = type ==  2 ? i2 : parseFloat(i2);
+		}
+	}
+	// CHECK THE THIRD VALUE (TYPE 3)
+	if(type > 2) {
+		var vals = new Array("m", "ft", "yd", "mi", "km");
+		if(typeof i3 === "undefined") {
+			obj.data[2] = null;
+		} else if(vals.indexOf(i3) == -1) {
+			obj.data[2] = false;
+		} else {
+			obj.data[2] = i3;
+		}
+	}
+	
+	// Get the success status and the result code
+	if(obj.data.length == 0) {
+		obj.success = false;
+		obj.code = 1;
+	} else {
+		for(var i = 0; i < type; i++) {
+			if(obj.data[i] === null) {
+				obj.success = false;
+				obj.code = 1;
+				break;
+			} else if (obj.data[i] === false) {
+				obj.success = false;
+				obj.code = 2;
+			}
+		}
+	}
+	return obj;
+}
+
 /**
  * Create a grid based on two adjacent grid lines
  *
@@ -1188,14 +1433,14 @@ GraphicsBuilder.prototype.gridFromAdjacentLines = function(g, o) {
 	var accuracy = typeof o.accuracy !== "undefined" && (o.accuracy == 4 || o.accuracy == 6) ? o.accuracy : 4;
 	// Check the grid
 	g = this.checkGrid(g, {accuracy: accuracy});
-	if(g) {
+	if(this.checkGridValues(1, g).success) {
 		this.setInitialGrid(g, accuracy);
 		// Set click and move functions
 		this.clickFunction = this.placeFirstAdjPoint;
 		this.moveFunction = this.crosshair;
 		this.canDrag = false;
 	} else {
-		console.error("Invalid grid given");
+		console.error("error", g);
 	}
 }
 
@@ -1213,7 +1458,7 @@ GraphicsBuilder.prototype.gridFromKnownPoints = function(g1, g2, o) {
 	// Check the grid
 	g1 = this.checkGrid(g1, {accuracy: 8});
 	g2 = this.checkGrid(g2, {accuracy: 8});
-	if(g1 && g2) {
+	if(this.checkGridValues(2, g1, g2).success) {
 		this.setInitialGrid(g1, accuracy);
 		this.setSecondGrid(g2);
 		var data = this.getDifference(g1, g2);
@@ -1222,6 +1467,8 @@ GraphicsBuilder.prototype.gridFromKnownPoints = function(g1, g2, o) {
 		this.clickFunction = this.placeFirstKnownPoint;
 		this.moveFunction = this.crosshair;
 		this.canDrag = false;
+	} else {
+		console.error("error", g1, g2);
 	}
 }
 
@@ -1238,13 +1485,15 @@ GraphicsBuilder.prototype.gridFromKnownDistance = function(g, d, u, o) {
 	var accuracy = typeof o.accuracy !== "undefined" && (o.accuracy == 4 || o.accuracy == 6) ? o.accuracy : 4;
 	// Check the grid
 	g = this.checkGrid(g, {accuracy: 8});
-	if(g) {
+	if(this.checkGridValues(3, g, d, u).success) {
 		this.setInitialGrid(g, accuracy);
 		this.setKnownDistance(d, u);
 		// Set click and move functions
 		this.clickFunction = this.placeGridKnownDistance;
 		this.moveFunction = this.crosshair;
 		this.canDrag = false;
+	} else {
+		console.error("error", g, d, u);
 	}
 }
 
@@ -1373,6 +1622,7 @@ GraphicsBuilder.prototype.checkGrid = function(g, r) {
 	var accuracy = typeof r.accuracy !== "undefined" && (r.accuracy == 4 || r.accuracy == 6 || r.accuracy == 8) ? r.accuracy : 8;
 	// Ensure there are no non-numeric characters in the grid
 	if(!isNaN(g)) {
+		g = g.toString();
 		// Ensure that the correct number of digits exists
 		if(g.length <= 8 && g.length > 0 && g.length % 2 == 0) {
 			var g1 = g.substring(0, g.length / 2);
@@ -1421,18 +1671,18 @@ GraphicsBuilder.prototype.getDifference = function(g1, g2) {
 	
 	// Convert g2 to ensure it is in quadrant1 in relation to g1
 	if(x2 < x1) {
-		x2 = 10000 + x2;
+		x2 = 1000 + x2;
 	}
 	if(y2 < y1) {
-		y2 = 10000 + y2;
+		y2 = 1000 + y2;
 	}
 	
 	// Set up the four iterations to get the change for each potential grid (based on grid zone identifiers)
 	var iterations = new Array(
 		new Array(x2, y2),
-		new Array(-10000 + x2, y2),
-		new Array(-10000 + x2, -10000 + y2),
-		new Array(x2, -10000 + y2)
+		new Array(-1000 + x2, y2),
+		new Array(-1000 + x2, -1000 + y2),
+		new Array(x2, -1000 + y2)
 	);
 	
 	var result = new Array();
@@ -1533,7 +1783,7 @@ GraphicsBuilder.prototype.getSelectedSymbols = function() {
 }
 
 GraphicsBuilder.prototype.removeSelectedSymbol = function(i) {
-	console.trace(i);
+	var originalLength = this.selectedSymbols.length;
 	if(typeof i !== "undefined") {
 		if(typeof i === "string") {
 			i = new Array(i);
@@ -1546,12 +1796,22 @@ GraphicsBuilder.prototype.removeSelectedSymbol = function(i) {
 				this.selectedSymbols.splice(this.selectedSymbols.indexOf(i[j]), 1);
 			}
 		}
-		console.log(this.selectedSymbols);
 	} else {
 		for(var i = 0; i < this.selectedSymbols.length; i++) {
 			this.symbolData[this.selectedSymbols[i]].flags({selected: false}).getElement().setAttribute("data-selected", false);
 		}
 		this.selectedSymbols = new Array();
+	}
+	// If the length is less, fire the onSelectCallback
+	if(this.selectedSymbols.length < originalLength) {
+		// User-defined function
+		if(this.offSelectCallback) {
+			var array = new Array();
+			for(var j = 0; j < this.selectedSymbols.length; j++) {
+				array.push(this.symbolData[this.selectedSymbols[j]]);
+			}
+			this.offSelectCallback(array);
+		}
 	}
 	return this.selectedSymbols;
 }

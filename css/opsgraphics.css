@@ -1,0 +1,68 @@
+#canvas-container {
+	position: absolute;
+	top: 71px;
+	cursor: default;
+}
+
+#graphics-canvas {
+	border: 1px solid black;
+}
+
+#symbol-layer g {
+	cursor: pointer;
+}
+
+#background-preview-container {
+	background-color: rgb(255, 0, 255);
+}
+
+#background-preview {
+	border: 1px solid black;
+}
+
+.image-controls .input-group {
+	margin-bottom: 10px;
+}
+
+.image-controls input[type="text"] {
+	text-align: center;
+}
+
+.graphics-colors-container {
+	height: 22px;
+}
+
+.graphics-color-selected {
+	float: left;
+	margin-right: 4px;
+	height: 22px;
+	width: 22px;
+	border: 1px solid black;
+}
+
+.graphics-color-bar {
+	float: left;
+	margin-left: 1px;
+	height: 22px;
+	padding-top: 1px;
+	padding-left: 1px;
+	border: 1px solid black;
+}
+
+.graphics-color-bar>.item {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 1px;
+	border: 1px solid black;
+	cursor: pointer;
+}
+
+p.text-label {
+	margin: 0;
+	font-weight: bold;
+}
+
+#gridModal .alert {
+	cursor: pointer;
+}

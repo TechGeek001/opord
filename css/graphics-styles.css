@@ -1,0 +1,27 @@
+.main-item {
+	background-color: #EEE;
+	border-radius: 4px;
+	border: 1px solid #CCC;
+	position: relative;
+	height: 360px;
+	overflow: hidden;
+}
+
+.main-item img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 360px;
+	height: 360px;
+	z-index: 5;
+}
+
+.main-item:hover img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 360px;
+	height: 360px;
+	opacity: .3;
+	z-index: 1;
+}

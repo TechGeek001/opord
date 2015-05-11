@@ -223,7 +223,6 @@ AnnexController.prototype.graphicsControls = function() {
 	var $unitSmallMenu = $("#unit-small-menu").hide();
 	var $unitSmallMenuOne = $unitSmallMenu.find(".select-one");
 	var $unitSmallMenuMany = $unitSmallMenu.find(".select-many");
-	var selectedUnits = new Array();
 	var startingSize = .35;
 	var $unitsPanel = $panel.find(".content[data-section='units']");
 	var $unitPreviewCanvas = $unitsPanel.find("svg");
@@ -239,16 +238,22 @@ AnnexController.prototype.graphicsControls = function() {
 	// Define the function when a unit is selected and deselected
 	this.G.onSelectCallback = function(u) {
 		$unitSmallMenu.find(".number").text(u.length);
-		if(u.length == 1) {
-			$unitSmallMenu.find(".unit-designation").val(u[0].AMPLIFIERS[3]);
-			$unitSmallMenu.find(".higher-unit").val(u[0].AMPLIFIERS[4]);
-			$unitSmallMenu.find(".comments").val(u[0].AMPLIFIERS[5]);
+		if(u.length > 0) {
 			$unitSmallMenu.show();
-			$unitSmallMenuOne.show();
-			$unitSmallMenuMany.hide();
+			if(u.length == 1) {
+				$unitSmallMenu.find(".unit-designation").val(u[0].AMPLIFIERS[3]);
+				$unitSmallMenu.find(".higher-unit").val(u[0].AMPLIFIERS[4]);
+				$unitSmallMenu.find(".comments").val(u[0].AMPLIFIERS[5]);
+				$unitSmallMenuOne.show();
+				$unitSmallMenuMany.hide();
+			} else {
+				$unitSmallMenuOne.hide();
+				$unitSmallMenuMany.show();
+			}
+			// Determine the position that the menu should take
+			Controller.G.onSymbolMove({symbols: u});
 		} else {
-			$unitSmallMenuOne.hide();
-			$unitSmallMenuMany.show();
+			Controller.G.offSelectCallback(u);
 		}
 		selectedUnits = u;
 	}
@@ -263,38 +268,65 @@ AnnexController.prototype.graphicsControls = function() {
 	}
 	
 	this.G.onSymbolMove = function(o) {
-		var averageX = 0;
-		for(var i = 0; i < o.symbols.length; i++) {
-			averageX += o.symbols[i].getTransformValues().translate[0];
-		}
-		averageX = averageX / o.symbols.length;
-		if(averageX <= $canvas.width() / 2) {
-			$unitSmallMenu.css({
-				"right": 5,
-				"left": ""
-			});
+		if(typeof o.mousePosition !== "undefined") {
+			var x = o.mousePosition.x;
+			var y = o.mousePosition.y;
+			if(x <= $canvas.width() / 2) {
+				$unitSmallMenu.css({
+					"right": 5,
+					"left": ""
+				});
+			} else {
+				$unitSmallMenu.css({
+					"left": 5,
+					"right": ""
+				});
+			}
+			if(y <= $canvas.height() / 2) {
+				$unitSmallMenu.css({
+					"bottom": 5,
+					"top": ""
+				});
+			} else {
+				$unitSmallMenu.css({
+					"top": 5,
+					"bottom": ""
+				});
+			}
 		} else {
-			$unitSmallMenu.css({
-				"left": 5,
-				"right": ""
-			});
-		}
-		
-		var averageY = 0;
-		for(var i = 0; i < o.symbols.length; i++) {
-			averageY += o.symbols[i].getTransformValues().translate[1];
-		}
-		averageY = averageY / o.symbols.length;
-		if(averageY <= $canvas.height() / 2) {
-			$unitSmallMenu.css({
-				"bottom": 5,
-				"top": ""
-			});
-		} else {
-			$unitSmallMenu.css({
-				"top": 5,
-				"bottom": ""
-			});
+			var averageX = 0;
+			for(var i = 0; i < o.symbols.length; i++) {
+				averageX += o.symbols[i].getTransformValues().translate[0];
+			}
+			averageX = averageX / o.symbols.length;
+			if(averageX <= $canvas.width() / 2) {
+				$unitSmallMenu.css({
+					"right": 5,
+					"left": ""
+				});
+			} else {
+				$unitSmallMenu.css({
+					"left": 5,
+					"right": ""
+				});
+			}
+			
+			var averageY = 0;
+			for(var i = 0; i < o.symbols.length; i++) {
+				averageY += o.symbols[i].getTransformValues().translate[1];
+			}
+			averageY = averageY / o.symbols.length;
+			if(averageY <= $canvas.height() / 2) {
+				$unitSmallMenu.css({
+					"bottom": 5,
+					"top": ""
+				});
+			} else {
+				$unitSmallMenu.css({
+					"top": 5,
+					"bottom": ""
+				});
+			}
 		}
 	}
 	
@@ -486,6 +518,7 @@ AnnexController.prototype.graphicsControls = function() {
 	// Add the symbol to the graphics
 	$unitsPanel.find($(".add-unit").click(function() {
 		unitPreview.draw();
+		console.log(unitPreview.toString());
 		Controller.G.addSymbol(unitPreview);
 		Controller.G.removeSelectedSymbol();
 		$unitSmallMenu.hide();

@@ -1,0 +1,69 @@
+<html>
+	<head>
+		<title>Graphics Builder</title>
+		<script type="text/javascript" src="js/jQuery1.9.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.js"></script>
+		<script type="text/javascript" src="js/opsgraphics.js"></script>
+		<script type="text/javascript" src="js/GraphicsBuilder.js"></script>
+		<script type="text/javascript" src="js/Unit.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.theme.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.structure.min.css">
+		<link rel="stylesheet" href="css/jquery-ui.min.css">
+		<link rel="stylesheet" href="css/override.css">
+		<link rel="stylesheet" href="css/opsgraphics.css">
+	</head>
+	<body>
+		<nav class="navbar navbar-inverse navbar-static-top">
+			<div class="container">
+				<ul class="nav navbar-nav">
+					<!-- IMAGE MENU -->
+					<li><a href="#imageModal" data-toggle="modal">Image</a></li>
+					<!-- GRID MENU -->
+					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Terrain <span class="caret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#">Terrain Analysis</a></li>
+							<li><a href="#">Obstacles</a></li>
+							<li class="divider"></li>
+							<li><a href="#gridModal" data-toggle="modal">Grid Lines</a></li>
+						</ul>
+					</li>
+					<!-- SYMBOLS MENU -->
+					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Symbols <span class="caret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#">Equipment</a></li>
+							<li><a href="#unitModal" data-toggle="modal">Unit</a></li>
+							<li><a href="#">Installation</a></li>
+							<li><a href="#">Stability / Support Operations</a></li>
+						</ul>
+					</li>
+					<!-- GRAPHIC CONTROL MEASURES MENU -->
+					<li><a href="#">Graphic Control Measures</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#"><span class="glyphicon glyphicon-folder-open"></span></a></li>
+					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-floppy-disk"></span></a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#">Save as Image</a></li>
+							<li><a href="#">Save as Text</a></li>
+						</ul>
+					</li>
+					<li><a href="#"><span class="glyphicon glyphicon-print"></span></a></li>
+					<li><a href="#"><span class="glyphicon glyphicon-arrow-right"></span></a></li>
+				</ul>
+			</div>
+		</nav>
+		<div class="container">
+			<div id="canvas-container">
+				<svg id="graphics-canvas" width="10in" height="7.5in" viewBox="0 0 1138 853"></svg>
+			</div>
+		</div>
+		<!-- IMAGE MODAL -->
+		<div class="modal" id="imageModal" data-backdrop="static"></div>
+		<!-- GRID MODAL -->
+		<div class="modal" id="gridModal" data-backdrop="static"></div>
+		<!-- UNIT MODAL -->
+		<div class="modal" id="unitModal" data-backdrop="static"></div>
+	</body>
+</html>
