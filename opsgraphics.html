@@ -13,8 +13,42 @@
 		<link rel="stylesheet" href="css/jquery-ui.min.css">
 		<link rel="stylesheet" href="css/override.css">
 		<link rel="stylesheet" href="css/opsgraphics.css">
+		<!-- CONVERT SVG TO CANVAS, THEN TO IMAGE -->
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script>
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+		<script type="text/javascript">
+			var imgCanvas;
+			
+			function convertCanvasToImage(canvas) {
+				var image = new Image();
+				image.src = imgCanvas.toDataURL("image/png");
+				return image;
+			}
+			
+			function a() {
+				canvg(imgCanvas, document.getElementById("hold").innerHTML.replace(/(\r\n|\n|\r|\t)/gm,""), {renderCallback: function() {
+					//document.getElementsByTagName("body")[0].appendChild(convertCanvasToImage(imgCanvas));
+				}});
+			}
+			
+			window.onload = function() {
+				imgCanvas = document.getElementById('picture-canvas');
+			}
+		</script>
 	</head>
 	<body>
+		<!-- GET STARTED -->
+		<div id="get-started">
+			<div class="jumbotron">
+				<div class="container">
+					<h1>Let's Get Started!</h1>
+					<p>This application helps you build Operational Graphics. If this is your first time here, check out the <a href="#">Tutorial</a> section for detailed explainations for each section</p>
+					<img src="/img/grid_help_main.png" class="img-responsive">
+					<p><i>Click anywhere to dismiss this message</i></p>
+				</div>
+			</div>
+		</div>
 		<nav class="navbar navbar-inverse navbar-static-top">
 			<div class="container">
 				<ul class="nav navbar-nav">
@@ -42,6 +76,7 @@
 					<li><a href="#">Graphic Control Measures</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#"><span class="glyphicon glyphicon-question-sign"></span></a></li>
 					<li><a href="#"><span class="glyphicon glyphicon-folder-open"></span></a></li>
 					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-floppy-disk"></span></a>
 						<ul class="dropdown-menu" role="menu">
@@ -56,7 +91,9 @@
 		</nav>
 		<div class="container">
 			<div id="canvas-container">
-				<svg id="graphics-canvas" width="10in" height="7.5in" viewBox="0 0 1138 853"></svg>
+				<svg id="graphics-canvas" width="10.5in" height="8in" viewBox="0 0 1138 867"></svg>
+				<!-- UNIT PANEL -->
+				<div class="canvas-panel bottom" id="unitPanel"></div>
 			</div>
 		</div>
 		<!-- IMAGE MODAL -->
@@ -65,5 +102,11 @@
 		<div class="modal" id="gridModal" data-backdrop="static"></div>
 		<!-- UNIT MODAL -->
 		<div class="modal" id="unitModal" data-backdrop="static"></div>
+		
+		<!-- PRINT CANVAS -->
+		<div id="hold">
+			<svg id="print-canvas" width="10.5in" height="8in" viewBox="0 0 1138 867"></svg>
+		</div>
+		<canvas id="picture-canvas"></canvas>
 	</body>
 </html>

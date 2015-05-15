@@ -6,79 +6,59 @@
 		</div>
 		<div class="modal-body">
 			<div class="row">
-				<div class="col-md-3">
-					<label>Symbol Type</label>
-					<select class="form-control type">
-						<option value="u">Unit</option>
-						<option value="e" disabled="disabled">Equipment</option>
-					</select>
-				</div>
-				<div class="col-md-3">
-					<label>Identification</label>
-					<select class="form-control identity"></select>
-				</div>
-				<div class="col-md-3">
-					<label>Icon</label>
-					<select class="form-control icon"></select>
-				</div>
-				<div class="col-md-3">
-					<label>Echelon</label>
-					<select class="form-control echelon"></select>
-				</div>
-			</div>
-			<div class="row spaced">
-				<div class="col-md-3">
-					<label>Country Indicator</label>
-						<select class="form-control country">
-							<option value="false">-- None --</option>
-						</select>
-				</div>
-				<div class="col-md-3">
-					<label>Unit Designation</label>
-					<input class="form-control unit-designation">
-				</div>
-				<div class="col-md-3">
-					<label>Higher Formation</label>
-					<input class="form-control higher-unit">
-				</div>
-				<div class="col-md-3">
-					<label>Comments / Location</label>
-					<div class="input-group">
-						<input class="form-control comments">
-						<span class="input-group-btn">
-							<button class="btn btn-default" type="button">Grid</button>
-						</span>
+				<div class="col-md-6">
+					<div id="unit-preview-container">
+						<svg width="460" height="377" id="unit-preview"></svg>
 					</div>
 				</div>
-			</div>
-			<div class="row spaced">
-				<div class="col-md-6">
-					<svg width="460" height="334"></svg>
-				</div>
-				<div class="col-md-6">
-					<div class="row">
-						<div class="col-md-6">
-							<label>Reinforced / Detached</label>
-							<div class="radio">
-								<label><input type="radio" name="refdet" class="refdet" checked="checked" value="n">None</label>
-							</div>
-							<div class="radio">
-								<label><input type="radio" name="refdet" class="refdet" value="r">Reinforced</label>
-							</div>
-							<div class="radio">
-								<label><input type="radio" name="refdet" class="refdet" value="d">Detached</label>
-							</div>
-							
-							<label class="spaced">Unit Indicators</label>
-							<div class="checkbox">
-								<label><input type="checkbox" class="tf">Group / Task Force</label>
-							</div>
-							<div class="checkbox">
-								<label><input type="checkbox" class="fd">Feint / Dummy</label>
+					<div class="col-md-3">
+						<div class="alert alert-default">
+							<label>Identification</label>
+							<select class="form-control identity"></select>
+							<label>Icon</label>
+							<select class="form-control icon"></select>
+							<label>Echelon</label>
+							<select class="form-control echelon"></select>
+							<label>Amplifier 1</label>
+							<select class="form-control amp1">
+								<option value="false" selected="selected">-- None--</option>
+							</select>
+							<label>Amplifier 2</label>
+							<select class="form-control amp2">
+								<option value="false" selected="selected">-- None--</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="alert alert-default">
+							<label>Reinforced / Reduced</label>
+							<select class="form-control refred">
+								<option value="n" selected="selected">-- None--</option>
+								<option value="ref">Reinforced</option>
+								<option value="red">Reduced</option>
+								<option value="b">Reinforced and Reduced</option>
+							</select>
+							<label>Country Indicator</label>
+							<select class="form-control country">
+								<option value="false">-- None --</option>
+							</select>
+							<label>Unit Designation</label>
+							<input type="text" class="form-control unit-designation">
+							<label>Higher Formation</label>
+							<input type="text" class="form-control higher-unit">
+							<label>Comments / Location</label>
+							<div class="input-group">
+								<input type="text" class="form-control comments">
+								<span class="input-group-btn">
+									<button class="btn btn-default" type="button">Grid</button>
+								</span>
 							</div>
 						</div>
-						
-						<div class="col-md-6">
+					</div>
+				</div>
+				<div class="alert alert-default">
+					<div class="row">
+						<div class="col-md-3">
 							<label>HQ / Command Post</label>
 							<select class="form-control headquarters">
 								<option value="false">-- None --</option>
@@ -91,7 +71,8 @@
 								<option value="main">Main Command Post</option>
 								<option value="tac">Tactical Command Post</option>
 							</select>
-							
+						</div>
+						<div class="col-md-3">
 							<label class="spaced">Combat Effectiveness</label>
 							<select class="form-control comeff">
 								<option value="false">-- None --</option>
@@ -101,24 +82,49 @@
 								<option value="b">Not Operational</option>
 							</select>
 						</div>
+						<div class="col-md-6">
+							<label class="spaced">Unit Indicators</label>
+							<div class="row">
+								<div class="col-md-6">
+									<div class="checkbox">
+										<label><input type="checkbox" class="tf">Group / Task Force</label>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="checkbox">
+										<label><input type="checkbox" class="fd">Feint / Dummy</label>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-					<hr>
-					
-					<label class="spaced">Icon Size</label>
-					<div id="size-slider"></div>
-					<label>Icon Type</label>
-					<div class="radio">
-						<label><input type="radio" name="icon-type" class="icon-type" disabled="disabled" value="color">Full Color</label>
-					</div>
-					<div class="radio">
-						<label><input type="radio" name="icon-type" class="icon-type" checked="checked" value="full">Filled</label>
-					</div>
-					<div class="radio">
-						<label><input type="radio" name="icon-type" class="icon-type" value="min">Minimal</label>
+				</div>
+				<div class="alert alert-default">
+					<div class="row">
+						<div class="col-md-6">
+							<label class="spaced">Icon Size</label>
+							<div id="size-slider-container">
+								<div id="size-slider"></div>
+							</div>
+							<ul class="slider-unit">
+								<li style="width: 20%">x-small</li>
+								<li style="width: 20%">small</li>
+								<li style="width: 20%">medium</li>
+								<li style="width: 20%">large</li>
+								<li style="width: 20%">x-large</li>
+							</ul>
+						</div>
+						<div class="col-md-3">
+							<label>Icon Type</label>
+							<select name="icon-type" class="form-control icon-type">
+								<option value="full" checked="checked">Filled</option>
+								<option value="min">Outline</option>
+								<option value="color">Color</option>
+							</select>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-primary create-unit">Create Unit</button>
 		</div>

@@ -1,42 +1,118 @@
 <html>
 	<head>
-		<title>OPORD Builder Help and Tutorial</title>
+		<title>Graphics Builder Help and Tutorial</title>
 		<script type="text/javascript" src="js/jQuery1.9.min.js"></script>
 		<script type="text/javascript" src="js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="js/opordBuilder.js"></script>
 		<link rel="stylesheet" href="css/bootstrap.min.css">
 		<link rel="stylesheet" href="css/override.css">
 		<link rel="stylesheet" href="css/styles.css">
+		
+		<style>
+			img {
+				margin-top: 0;
+				margin-right: 10px;
+				max-height: 200px;
+				min-height: 200px;
+			}
+			
+			.og-only:after {
+				content: "Operational Graphics Only";
+				color: red;
+				font-size: 16px;
+				margin-left: 8px;
+			}
+			
+			.cs-only:after {
+				content: "Concept Sketch Only";
+				color: blue;
+				font-size: 16px;
+				margin-left: 8px;
+			}
+		</style>
+		
 	</head>
+	<script>
+		$(document).ready(function() {
+			var $nav = $("#navigation");
+			var h2 = 1;
+			$("h2").not($("h2").eq(0)).each(function() {
+				var h3 = 1;
+				var h4 = 1;
+				var $e = $(this);
+				var $li = $("<li>").append(
+					$("<a>").attr("href", "#C" + h2).text($e.text())
+				);
+				var $sub = null;
+				$nav.append($li);
+				$e.text(h2 + ". " + $e.text());
+				$e.before($("<a>").attr("name", "C" + h2));
+				while($e.next().length == 1 && $e.next().prop("tagName") != "H2") {
+					$e = $e.next();
+					if($e.prop("tagName") == "H3") {
+						h4 = 1;
+						if($sub === null) {
+							$sub = $("<ol>");
+						}
+						$sub.append(
+							$("<li>").append(
+								$("<a>").attr("href", "#C" + h2 + "-" + h3).text($e.text())
+							)
+						);
+						$e.text(h2 + "." + h3 + ". " + $e.text());
+						$e.after($("<a>").attr("name", "C" + h2 + "-" + h3));
+						h3++;
+					} else if($e.prop("tagName") == "H4") {
+						$e.text(h2 + "." + (h3 - 1) + "." + h4 + ". " + $e.text());
+						$e.before($("<a>").attr("name", "C" + h2 + "-" + (h3 - 1) + "-" + h4));
+						h4++;
+					}
+				}
+				if($sub !== null) {
+					$sub.appendTo($li);
+				}
+				h2++;
+			});
+		});
+	</script>
 	<body>
 		<div class="container">
 			<div class="page-header">
-				<h1>OPORD Builder Help and Tutorial</h1>
+				<h1>Graphics Builder <small>Help and Tutorials</small></h1>
 			</div>
 			<h2>Contents</h2>
-			<h3><a href="#navigation">Navigation</a></h3>
-			<ul class="list-unstyled">
-				<li>Main Navigation</li>
-				<li>Sub-Navigation</li>
-				<li>Annex Builder Navigation</li>
-			</ul>
-			<h3>OPORD Builder</h3>
-			<ul class="list-unstyled">
-				<li>Admin Information</li>
-				<li>Situation</li>
-				<li>Mission</li>
-				<li>Execution</li>
-				<li>Sustainment</li>
-				<li>Command and Control</li>
-			</ul>
-			<h3>Appendix Builder</h3>
-			<ul class="list-unstyled">
-				<li>Graphics</li>
-			</ul>
+			<ol id="navigation"></ol>
 			<hr>
 			<h2>Navigation</h2>
 			<a name="navigation"></a>
-			<p>Navigating the application is done through two menus. The <i>main navigation bar</i> runs along the top of the page, just under the title. It is used to access major sections of the application.</p>
+			<p></p>
+			<hr>
+			<h2>Concept Sketch / Operational Graphics</h2>
+			<a name="csog"></a>
+			<p>The <b>Concept Sketch</b> and <b>Operational Graphics</b> are created using an almost identical application, except that the Concept Sketch does not have a background image, and the Operational Graphics do not use tactical task symbols such as <i>suppress</i> or <i>destroy</i>. Unless specifically noted, the help content below applies to both applications.</p>
+			<h3 class="og-only">Background Image</h3>
+			<p>TODO</p>
+			<h4>Getting an Image from Google Maps</h4>
+			<p>To take an image off of Google Maps, we need to take, edit, and save a screenshot of the terrain in question. To do this on a Windows computer, follow the steps below:</p>
+			<p><b>1. Navigate to Google Maps in your browser</b>, and turn Satellite View on by clicking the Earth button in the bottom left corner. Find the are you want to take a screenshot of on the Maps program.</p>
+			<img src="/img/help/google_screenshot1.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot2.png" class="img-responsive img-thumbnail">
+			<p><b>2. Go to Start &gt; All Programs &gt; Accessories</b>. If your computer has the Snipping Tool application, follow the instructions under <i>Use the Snipping Tool (preferred)</i>. If your computer does NOT have the Snipping Tool application, follow the instructions under <i>Use Microsoft Paint</i>.</p>
+			<img src="/img/help/google_screenshot3.png" class="img-responsive img-thumbnail">
+			<p><b>2a. Use the Snipping Tool (preferred)</b> to take the screenshot. Open the program and use the crosshair to drag a box around the area you want to select. Note that it is a good idea to capture more than just the area you want to use on your graphics. If you don't like the area you selected the first time, click "New" to try again. Once you are happy with your image, click the "Save" icon and store the image in a place you can get to easily (on your Desktop). Skip to <i>Upload the image</i>.</p>
+			<img src="/img/help/google_screenshot4.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot5.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot6.png" class="img-responsive img-thumbnail">
+			<p><b>2b. Use Microsoft Paint</b> to take the screenshot. Press the <i>Print Screen</i> key on your keyboard. Open Microsoft Paint in <b>Start &gt; All Programs &gt; Accessories</b>. In the upper left corner of Paint, click the <b>Paste</b> button, or press <b>Ctrl + V</b> at the same time on your keyboard. Click the <b>Select</b> button and drag a box around the area of your screen that you want to use on your graphics. Note that it is a good idea to include more than just the area you want to use. </p>
+			<img src="/img/help/google_screenshot7.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot8.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot9.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot10.png" class="img-responsive img-thumbnail">
+			<p>In the upper left corner, click the <b>Crop</b> button, or press <b>Ctrl + Shift + X</b> at the same time on your keyboard. This will leave only the area you have selected. Click the menu button in the upper left corner and select <b>Save As</b>. Store your image in an easy to remember place (your Desktop, for example).</p>
+			<img src="/img/help/google_screenshot12.png" class="img-responsive img-thumbnail">
+			<img src="/img/help/google_screenshot13.png" class="img-responsive img-thumbnail">
+			<p><b>3. Upload the image </b> 
+			<h3 class="cs-only">Tactical Tasks</h3>
+			<p></p>
 		</div>
 	</body>
 </html>

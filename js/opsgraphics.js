@@ -18,14 +18,27 @@ function init() {
 	// The canvas element
 	$canvasContainer = $("#canvas-container");
 	$canvas = $canvasContainer.find("#graphics-canvas");
+	
+	$canvas.bind("DOMSubtreeModified", function() {
+		$("#print-canvas").html($(this).html());
+		$("#print-canvas *").removeAttr('id');
+	});
+	
 	resizeCanvas();
+	
+	// Open the submenu on hover
+	$("nav .dropdown").mouseenter(function() {
+		$(this).addClass("open");
+	}).mouseleave(function() {
+		$(this).removeClass("open");
+	});
+	
+	G = new GraphicsBuilder("graphics-canvas", $canvas.width(), $canvas.height());
+	G.setImage(-50, -100, $canvas.width(), $canvas.height(), 1.22, "img/galloway.png");
 	
 	imageControls();
 	gridControls();
 	unitControls();
-	
-	G = new GraphicsBuilder("graphics-canvas", $canvas.width(), $canvas.height());
-	G.setImage(-50, -100, $canvas.width(), $canvas.height(), 1.22, "img/galloway.png");
 }
 
 function imageControls() {
@@ -342,6 +355,13 @@ function unitControls() {
 	var $unitPreviewCanvas;
 	var startingSize = .25;
 	var unitPreview;
+	var $unitPanelOne;
+	var $unitPanelMany;
+	var selectedUnits;
+	
+	$unitModal.on('shown.bs.modal', function(e) {
+		unitPreview.center();
+	});
 	// LOAD THE GRID MODAL DATA
 	$unitModal.load("/parts/graphics/unit.html", function(response, status, xhr) {
 		$unitPreviewCanvas = $unitModal.find("svg");
@@ -350,13 +370,15 @@ function unitControls() {
 		var identities = unitPreview.identities();
 		var $identity = $unitModal.find("select.identity");
 		$.each(identities, function(k, v) {
-			if(k == "f") {
-				$("<option>").attr({
-					value: k,
-					selected: "selected"
-				}).text(v.title).data("type", v.type).appendTo($identity);
-			} else {
-				$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($identity);
+			if(k !== "0") {
+				if(k == "f") {
+					$("<option>").attr({
+						value: k,
+						selected: "selected"
+					}).text(v.title).data("type", v.type).appendTo($identity);
+				} else {
+					$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($identity);
+				}
 			}
 		});
 		// Set the icons
@@ -368,13 +390,15 @@ function unitControls() {
 					value: k,
 					selected: "selected"
 				}).text(v.title).data("type", v.type).appendTo($icon);
-			} else if(typeof v.definition === "undefined") {
-				$("<option>").attr({
-					value: k,
-					disabled: "disabled"
-				}).text(v.title).data("type", v.type).appendTo($icon);
-			} else {
-				$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($icon);
+			} else if(k != "000") {
+				if(typeof v.definition === "undefined") {
+					$("<option>").attr({
+						value: k,
+						disabled: "disabled"
+					}).text(v.title).data("type", v.type).appendTo($icon);
+				} else {
+					$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($icon);
+				}
 			}
 		});
 		// Set the echelons
@@ -416,50 +440,50 @@ function unitControls() {
 		$size.slider({
 			value: startingSize,
 			min: .2,
-			max: .7,
+			max: .4,
 			step: .05,
 			slide: function(event, ui) {
-				unitPreview.settings({scale: ui.value}).draw();
+				unitPreview.settings({scale: ui.value}).draw().center();
 			},
 			change: function(event, ui) {
-				unitPreview.settings({scale: ui.value}).draw();
+				unitPreview.settings({scale: ui.value}).draw().center();
 			}
 		});
 		// Set the frame type
 		var $frameType = $unitModal.find(".icon-type");
 		// Change the unit identification
 		$identity.change(function() {
-			unitPreview.identity($(this).val()).draw();
+			unitPreview.identity($(this).val()).draw().center();
 		}).change();
 		// Change the unit icon
 		$icon.change(function() {
-			unitPreview.icon($(this).val()).draw();
+			unitPreview.icon($(this).val()).draw().center();
 		}).change();
 		// Change the unit echelon
 		$echelon.change(function() {
-			unitPreview.echelon($(this).val()).draw();
+			unitPreview.echelon($(this).val()).draw().center();
 		}).change();
 		// Change reinforced/detached
 		$refdet.click(function() {
-			unitPreview.amplifiers({1: $(this).val()}).draw();
+			unitPreview.amplifiers({1: $(this).val()}).draw().center();
 		});
 		// Change country indicator
 		$country.change(function() {
-			unitPreview.amplifiers({2: $(this).val()}).draw();
+			unitPreview.amplifiers({2: $(this).val()}).draw().center();
 		});
 		// Change the headquarters type
 		$headquarters.change(function() {
 			var isHeadquarters = $(this).val() != "false";
 			unitPreview.amplifiers({10: {a: isHeadquarters}});
 			if(isHeadquarters) {
-				$echelon.val("none");
-				unitPreview.echelon("none");
+				$echelon.val("000");
+				unitPreview.echelon("000");
 				if($(this).val() != "true") {
 					unitPreview.amplifiers({14: $(this).val()});
 				} else {
 					unitPreview.amplifiers({14: false});
 				}
-				unitPreview.draw();
+				unitPreview.draw().center();
 			} else {
 				unitPreview.amplifiers({14: false});
 				$echelon.change();
@@ -467,31 +491,31 @@ function unitControls() {
 		});
 		// Change the unit designation
 		$unitDesignation.on("input", function() {
-			unitPreview.amplifiers({3: $(this).val()}).draw();
+			unitPreview.amplifiers({3: $(this).val()}).draw().center();
 		});
 		// Change the higher formation
 		$higherUnit.on("input", function() {
-			unitPreview.amplifiers({4: $(this).val()}).draw();
+			unitPreview.amplifiers({4: $(this).val()}).draw().center();
 		});
 		// Change the comments/location
 		$comments.on("input", function() {
-			unitPreview.amplifiers({5: $(this).val()}).draw();
+			unitPreview.amplifiers({5: $(this).val()}).draw().center();
 		});
 		// Change the TaskForce modifier
 		$tf.click(function() {
-			unitPreview.amplifiers({8: $(this).is(":checked")}).draw();
+			unitPreview.amplifiers({8: $(this).is(":checked")}).draw().center();
 		});
 		// Change the feint/dummy modifier
 		$fd.click(function() {
-			unitPreview.amplifiers({9: $(this).is(":checked")}).draw();
+			unitPreview.amplifiers({9: $(this).is(":checked")}).draw().center();
 		});
 		// Change the icon type
 		$frameType.click(function() {
-			unitPreview.settings({type: $(this).val()}).draw();
+			unitPreview.settings({type: $(this).val()}).draw().center();
 		});
 		// Add the symbol to the graphics
 		$unitModal.find($(".create-unit").click(function() {
-			unitPreview.draw();
+			unitPreview.settings({translate: "0,0"}).draw();
 			G.addSymbol(unitPreview);
 			G.removeSelectedSymbol();
 			// Create a new unit for the preview
@@ -506,19 +530,108 @@ function unitControls() {
 			$unitModal.modal("hide");
 		}));
 	});
+	// LOAD THE UNIT PANEL DATA
+	$unitPanel.load("/parts/graphics/unit-panel.html", function(response, status, xhr) {
+		$unitPanel.find(".close").click(function() {
+			$unitPanel.hide();
+		});
+		$unitPanelOne = $unitPanel.find(".one");
+		$unitPanelMany = $unitPanel.find(".many");
+		
+		// Close the small unit panel and deselect all units
+		$(this).find(".close").click(function() {
+			$(this).hide();
+			Controller.G.removeSelectedSymbol();
+		});
+		// Copy the selected units
+		$(this).find(".copy-unit").click(function() {
+			var toAdd = new Array();
+			for(var i = 0; i < selectedUnits.length; i++) {
+				var j = G.addSymbol(selectedUnits[i].copy());
+				toAdd.push(j);
+			};
+			G.addSelectedSymbol(toAdd, true);
+		});
+		// Delete the selected units
+		$(this).find(".delete-unit").click(function() {
+			for(var i = selectedUnits.length - 1; i >= 0; i--) {
+				G.removeSymbol(selectedUnits[i].getElement().getAttribute("data-index"));
+			}
+			$unitPanel.hide();
+		});
+		// Change the unit designation
+		$(this).find(".unit-designation").on("input", function() {
+			var string = $(this).val();
+			for(var i = 0; i < selectedUnits.length; i++) {
+				selectedUnits[i].amplifiers({3: string}).draw();
+			}
+		});
+		// Change the higher formation
+		$(this).find(".higher-unit").on("input", function() {
+			var string = $(this).val();
+			for(var i = 0; i < selectedUnits.length; i++) {
+				selectedUnits[i].amplifiers({4: string}).draw();
+			}
+		});
+		// Change the comments/location
+		$(this).find(".comments").on("input", function() {
+			var string = $(this).val();
+			for(var i = 0; i < selectedUnits.length; i++) {
+				selectedUnits[i].amplifiers({5: string}).draw();
+			}
+		});
+	}).hide();
+	
+	// Define the function when a unit is selected and deselected
+	G.onSelectCallback = function(u, m) {
+		$unitPanel.find(".number").text(u.length);
+		if(u.length > 0) {
+			$unitPanel.show();
+			if(u.length == 1) {
+				$unitPanel.find(".unit-designation").val(u[0].AMPLIFIERS[3]);
+				$unitPanel.find(".higher-unit").val(u[0].AMPLIFIERS[4]);
+				$unitPanel.find(".comments").val(u[0].AMPLIFIERS[5]);
+				$unitPanelOne.show();
+				$unitPanelMany.hide();
+			} else {
+				$unitPanelOne.hide();
+				$unitPanelMany.show();
+			}
+			// Determine the position that the menu should take
+			G.onSymbolMove({mouse: m});
+		} else {
+			G.offSelectCallback(u);
+		}
+		selectedUnits = u;
+	}
+	
+	G.offSelectCallback = function(u) {
+		if(u.length == 0) {
+			$unitPanel.hide();
+			selectedUnits = u;
+		} else if(u.length == 1) {
+			G.onSelectCallback(u);
+		}
+	}
+	
+	G.onSymbolMove = function(o) {
+		if(typeof o.mouse !== "undefined") {
+			var y = o.mouse.y;
+			if(y <= $canvas.height() / 2) {
+				$unitPanel.attr("class", "canvas-panel bottom");
+			} else {
+				$unitPanel.attr("class", "canvas-panel top");
+			}
+		}
+	}
 }
 
 function resizeCanvas() {
 	var originalWidth = 1140;
 	// The ratio between the width and height of the canvas (based on 8" x 10.5" print dimensions)
-	var aspectRatio = .75;
+	var aspectRatio = (8 / 10.5);
 	var canvasWidth = $canvasContainer.closest(".container").width();
-	if(parseInt(canvasWidth * aspectRatio) > window.innerHeight - 91) {
-		var canvasHeight = window.innerHeight - 91;
-		canvasWidth = parseInt(canvasHeight / aspectRatio);
-	} else {
-		var canvasHeight = parseInt(canvasWidth * aspectRatio);
-	}
+	var canvasHeight = parseInt(canvasWidth * aspectRatio) + 1;
 	var scale = canvasWidth / originalWidth;
 	$canvasContainer.css({
 		width: canvasWidth,
@@ -531,5 +644,11 @@ function resizeCanvas() {
 		height: $canvasContainer.height()
 	});
 }
+
+$(document).ready(function() {
+	$("#get-started").click(function() {
+		$("#get-started").remove();
+	});
+});
 
 $(window).load(init);

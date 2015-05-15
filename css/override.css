@@ -38,8 +38,12 @@ h3, h4 {
 	padding-left: 30px;
 }
 
-input[type="text"], input[type="file"], select {
+input[type="text"], input[type="file"], select, .input-group {
 	margin-bottom: 10px;
+}
+
+.btn-block {
+	text-align: center;
 }
 
 .glyphicon.red {

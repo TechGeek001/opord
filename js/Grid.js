@@ -1,3 +1,3 @@
-function Grid() {
-	
+function Grid(width, height) {
+
 }

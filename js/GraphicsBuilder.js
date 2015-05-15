@@ -642,7 +642,7 @@ GraphicsBuilder = function(container, w, h) {
 							for(var j = 0; j < Controller.selectedSymbols.length; j++) {
 								array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
 							}
-							Controller.onSelectCallback(array);
+							Controller.onSelectCallback(array, Controller.mousePosition(e));
 						}
 					} else {
 						// If the unit was dragged, and the selected attribute has been added, the unit(s) remain selected
@@ -660,7 +660,7 @@ GraphicsBuilder = function(container, w, h) {
 							for(var j = 0; j < Controller.selectedSymbols.length; j++) {
 								array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
 							}
-							Controller.onSelectCallback(array);
+							Controller.onSelectCallback(array, Controller.mousePosition(e));
 						}
 					} else {
 						// If the unit was not dragged, and the selected attribute has already been added, the unit is deselected
@@ -937,7 +937,7 @@ GraphicsBuilder = function(container, w, h) {
 					for(var j = 0; j < Controller.selectedSymbols.length; j++) {
 						array.push(Controller.symbolData[Controller.selectedSymbols[j]]);
 					}
-					Controller.onSelectCallback(array);
+					Controller.onSelectCallback(array, m);
 				}
 			}
 		}

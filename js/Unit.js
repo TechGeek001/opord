@@ -271,12 +271,12 @@ Unit.prototype.amplifiers = function(a) {
 						multiple unit locations and headquarters. (See figure 4-3 on page 4-11.)
 						*/
 						if(typeof s.a === "boolean") {
-							this.AMPLIFIERS[i] = s.a;
+							this.AMPLIFIERS[i].a = s.a;
 						} else if(typeof s.a === "string") {
 							if(s.a == "true") {
-								this.AMPLIFIERS[i] = true;
+								this.AMPLIFIERS[i].a = true;
 							} else if(s.a == "false") {
-								this.AMPLIFIERS[i] = false;
+								this.AMPLIFIERS[i].a = false;
 							}
 						}
 						break;
@@ -290,12 +290,6 @@ Unit.prototype.amplifiers = function(a) {
 					case(12):
 						/*
 						Combat effectiveness of unit or equipment displayed. (See Table 4-9 on page 4-36.)
-						*/
-						break;
-					case(13):
-						/*
-						Mobility indicator of the equipment being displayed. (See figure 5-1 on page 5-15 and table 5-3
-						on page 5-13.)
 						*/
 						break;
 					case(14):
@@ -341,7 +335,6 @@ Unit.prototype.settings = function(s) {
 				}
 				break;
 			default:
-				console.log("TEST: The unknown setting value (" + s[k] + ") for " + k + " was changed.");
 				this.SETTINGS[k] = s[k];
 		}
 	}
@@ -600,6 +593,10 @@ Unit.prototype.draw = function(canvas) {
 		var centerX = 0;
 		var iconFullWidth = 0;
 		var iconFullHeight = 0;
+		var iconWidth = 0;
+		var iconHeight = 0;
+		var iconOffsetX = 0;
+		var iconOffsetY = 0;
 		var iconDiamondWidthOffset = 0;
 		var iconDiamondHeightOffset = 0;
 		var iconQuatrefoilWidthOffset = 0;
@@ -622,6 +619,10 @@ Unit.prototype.draw = function(canvas) {
 					centerX = rectWidth / 2;
 					iconFullWidth = width;
 					iconFullHeight = height;
+					iconWidth = height;
+					iconHeight = height / 3;
+					iconOffsetX = (width - iconWidth) / 2;
+					iconOffsetY = iconHeight;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					frameGroup.appendChild(drawRect(0, 0, width, height, o));
 					// Translate to make room for the echelon
@@ -639,6 +640,10 @@ Unit.prototype.draw = function(canvas) {
 					centerX = width / 2;
 					iconFullWidth = rectWidth / diamondConstant;
 					iconFullHeight = rectHeight / diamondConstant;
+					iconWidth = iconFullHeight;
+					iconHeight = iconFullHeight / 3;
+					iconOffsetX = ((width - iconWidth) / 4) - (border * 2);
+					iconOffsetY = iconHeight + (border / 2);
 					iconDiamondWidthOffset = (width - iconFullWidth) / 2;
 					iconDiamondHeightOffset = (height - iconFullHeight) / 4;
 					// Translate to center and make room for the echelon
@@ -651,6 +656,10 @@ Unit.prototype.draw = function(canvas) {
 					centerX = width / 2;
 					iconFullWidth = width;
 					iconFullHeight = height;
+					iconWidth = height * .8;
+					iconHeight = height / 3;
+					iconOffsetX = (width - iconWidth) / 2;
+					iconOffsetY = iconHeight;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
 					frameGroup.appendChild(drawRect(0, 0, width, height, o));
 					// Translate to make room for the echelon
@@ -663,6 +672,10 @@ Unit.prototype.draw = function(canvas) {
 					centerX = width / 2;
 					iconFullWidth = rectWidth / quatrefoilConstant;
 					iconFullHeight = rectHeight / quatrefoilConstant;
+					iconWidth = iconFullHeight;
+					iconHeight = iconFullHeight / 3;
+					iconOffsetX = ((width - iconWidth) / 4);
+					iconOffsetY = iconHeight + (border / 2);
 					iconQuatrefoilWidthOffset = (width - iconFullWidth) / 2;
 					iconQuatrefoilHeightOffset = (height - iconFullHeight) / 2;
 					var o = !frame.dasharray ? {} : {dasharray: frame.dasharray + " " + frame.dasharray, dashoffset: frame.dasharray / 2};
@@ -678,15 +691,42 @@ Unit.prototype.draw = function(canvas) {
 		this.SVG_GROUP.appendChild(frameGroup);
 		// Build the icon
 		if(typeof icon.definition !== "undefined") {
+			if(typeof icon.fullFrame !== "undefined" && icon.fullFrame === true) {
+				var useWidth = iconFullWidth;
+				var useHeight = iconFullHeight;
+				var useOffsetX = 0;
+				var useOffsetY = 0;
+			} else {
+				var useWidth = iconWidth;
+				var useHeight = iconHeight;
+				var useOffsetX = iconOffsetX;
+				var useOffsetY = iconOffsetY;
+			}
+			if(typeof icon.useFullSize !== "undefined" && icon.useFullSize === true && (frame.unit_frame == "diamond" || frame.unit_frame == "quatrefoil")) {
+				var useWidth = width;
+				var useHeight = height;
+				if(frame.unit_frame == "diamond") {
+					var useOffsetX = (iconDiamondWidthOffset * -1);
+					var useOffsetY = (iconDiamondHeightOffset * -2) + (border / 2);
+				} else {
+					var useOffsetX = (iconQuatrefoilWidthOffset * -1);
+					var useOffsetY = (iconQuatrefoilHeightOffset * -1);
+				}
+			}
 			for(var i = 0; i < icon.definition.length; i++) {
 				var d = icon.definition[i];
 				switch(d.type) {
 					case("line"):
-						var x1 = icon.fullFrame ? d.x1 * iconFullWidth : d.x1;
-						var y1 = icon.fullFrame ? d.y1 * iconFullHeight : d.y1;
-						var x2 = icon.fullFrame ? d.x2 * iconFullWidth : d.x2;
-						var y2 = icon.fullFrame ? d.y2 * iconFullHeight : d.y2;
+						var x1 = (d.x1 * useWidth) + useOffsetX;
+						var y1 = (d.y1 * useHeight) + useOffsetY;
+						var x2 = (d.x2 * useWidth) + useOffsetX;
+						var y2 = (d.y2 * useHeight) + useOffsetY;
 						iconGroup.appendChild(drawLine(x1, y1, x2, y2));
+						break;
+					case("text"):
+						var x = (d.x * useWidth) + useOffsetX;
+						var y = (d.y * useHeight) + useOffsetY;
+						iconGroup.appendChild(drawText(x, y, d.text, "middle", {fill: lineColor}));
 						break;
 				}
 			}
@@ -931,6 +971,26 @@ Unit.prototype.draw = function(canvas) {
 	return this;
 }
 
+Unit.prototype.center = function() {
+	var unitSize = this.SVG_GROUP.getBBox();
+	var parent = this.SVG_GROUP.parentNode;
+	while(parent && parent.nodeName.toLowerCase() != "svg") {
+		parent = parent.parentNode;
+	}
+	if(parent.nodeName.toLowerCase() != "svg") {
+		console.error("Could not find the containing SVG element");
+		return false;
+	}
+	var thisX = this.SVG_GROUP.getBoundingClientRect().width;
+	var thisY = this.SVG_GROUP.getBoundingClientRect().height;
+	var parentX = parent.getBoundingClientRect().width;
+	var parentY = parent.getBoundingClientRect().height;
+	var x = (parentX / 2) - (thisX / 2);
+	var y = (parentY / 2) - (thisY / 2);
+	this.settings({translate: x + "," + y});
+	this.setTransformValues(this.SVG_GROUP);
+}
+
 // Return the HTML object
 Unit.prototype.getElement = function() {
 	return this.SVG_GROUP;
@@ -1024,14 +1084,14 @@ Unit.prototype.identities = function(id) {
 		},
 		"f": {
 			title: "Friendly",
-			color: "blue",
+			color: "#99CEFB",
 			dasharray: false,
 			unit_frame: "rect",
 			equipment_frame: "circle"
 		},
 		"a": {
 			title: "Assumed Friendly",
-			color: "blue",
+			color: "#99CEFB",
 			dasharray: 12,
 			unit_frame: "rect",
 			equipment_frame: "circle"
@@ -1108,21 +1168,43 @@ Unit.prototype.icons = function(icn) {
 			title: "-- None --",
 			type: "unit"
 		},
-		"adm": {
-			title: "Administrative",
-			type: "unit"
-			},
 		"ada": {
 			title: "Air Defense Artillery",
 			type: "unit"
 		},
-		"amd": {
+		"amd": {	// TODO
 			title: "Air and Missile Defense",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "AMD",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"ana": {
 			title: "Anti-Armor",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "line",
+					x1: 0,
+					x2: .5,
+					y1: 1,
+					y2: 0
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: 1,
+					y1: 0,
+					y2: 1
+				}
+			)
 		},
 		"arm": {
 			title: "Armored (Armor)",
@@ -1146,7 +1228,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"bnd": {
 			title: "Band",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "BAND",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"cav": {
 			title: "Cavalry (Reconnaissance)",
@@ -1172,7 +1263,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"cva": {
 			title: "Civil Affairs",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "CA",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"cmc": {
 			title: "Civil-Military Cooperation",
@@ -1180,7 +1280,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"crs": {
 			title: "Chaplain (Religious Support)",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "REL",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"cba": {
 			title: "Combined Arms",
@@ -1188,7 +1297,38 @@ Unit.prototype.icons = function(icn) {
 		},
 		"eng": {
 			title: "Engineer",
-			type: "unit"
+			type: "unit",
+			fullFrame: false,
+			definition: new Array(
+				{
+					type: "line",
+					x1: 0,
+					x2: 1,
+					y1: 0,
+					y2: 0
+				},
+				{
+					type: "line",
+					x1: 0,
+					x2: 0,
+					y1: 0,
+					y2: 1
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: .5,
+					y1: 0,
+					y2: 1
+				},
+				{
+					type: "line",
+					x1: 1,
+					x2: 1,
+					y1: 0,
+					y2: 1
+				}
+			)
 		},
 		"fda": {
 			title: "Field Artillery",
@@ -1196,11 +1336,95 @@ Unit.prototype.icons = function(icn) {
 		},
 		"fin": {
 			title: "Finance",
-			type: "unit"
+			type: "unit",
+			fullFrame: false,
+			definition: new Array(
+				{
+					type: "line",
+					x1: .2,
+					x2: .8,
+					y1: 1,
+					y2: 1
+				},
+				{
+					type: "line",
+					x1: .2,
+					x2: .8,
+					y1: .5,
+					y2: .5
+				},
+				{
+					type: "line",
+					x1: .2,
+					x2: .2,
+					y1: 1,
+					y2: .5
+				},
+				{
+					type: "line",
+					x1: .8,
+					x2: .8,
+					y1: 1,
+					y2: .5
+				},
+				{
+					type: "line",
+					x1: .2,
+					x2: .4,
+					y1: .5,
+					y2: 0
+				},
+				{
+					type: "line",
+					x1: .8,
+					x2: .6,
+					y1: .5,
+					y2: 0
+				},
+				{
+					type: "line",
+					x1: .4,
+					x2: .6,
+					y1: 0,
+					y2: 0
+				}
+			)
 		},
 		"mtf": {
 			title: "Hospital (Medical Treatment Facility)",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			useFullSize: true,
+			definition: new Array(
+				{
+					type: "line",
+					x1: 0,
+					x2: 1,
+					y1: .5,
+					y2: .5
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: .5,
+					y1: 0,
+					y2: 1
+				},
+				{
+					type: "line",
+					x1: .25,
+					x2: .25,
+					y1: .33,
+					y2: .66
+				},
+				{
+					type: "line",
+					x1: .75,
+					x2: .75,
+					y1: .33,
+					y2: .66
+				}
+			)
 		},
 		"inf": {
 			title: "Infantry",
@@ -1225,7 +1449,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"ino": {
 			title: "Information Operations",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "IO",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"trp": {
 			title: "Interpreter / Translator",
@@ -1233,11 +1466,29 @@ Unit.prototype.icons = function(icn) {
 		},
 		"jag": {
 			title: "Judge Advocate General",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "JAG",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"lio": {
 			title: "Liaison",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "LO",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"mnt": {
 			title: "Maintenance",
@@ -1249,23 +1500,77 @@ Unit.prototype.icons = function(icn) {
 		},
 		"med": {
 			title: "Medical",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			useFullSize: true,
+			definition: new Array(
+				{
+					type: "line",
+					x1: 0,
+					x2: 1,
+					y1: .5,
+					y2: .5
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: .5,
+					y1: 0,
+					y2: 1
+				}
+			)
 		},
 		"mih": {
 			title: "Military History",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "MH",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"min": {
 			title: "Military Intelligence",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "MI",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"mlp": {
 			title: "Military Police",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "MP",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"mld": {
 			title: "Missile Defense",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "MD",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"ord": {
 			title: "Ordnance",
@@ -1273,7 +1578,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"prs": {
 			title: "Personnel (Personnel Services or Human Resources)",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "PS",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"psy": {
 			title: "Psycological Operations / Military Information Support Operations",
@@ -1281,7 +1595,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"pba": {
 			title: "Public Affairs",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "PA",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"qtm": {
 			title: "Quartermaster",
@@ -1289,23 +1612,83 @@ Unit.prototype.icons = function(icn) {
 		},
 		"rgr": {
 			title: "Ranger",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "RGR",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"sel": {
 			title: "Sea, Air, Land (SEAL) Navy",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SEAL",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"sec": {
 			title: "Security (Internal Security Forces)",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SEC",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"scp": {
 			title: "Security Police",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SP",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"sig": {
 			title: "Signal",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "line",
+					x1: 0,
+					x2: .5,
+					y1: 0,
+					y2: .6
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: .5,
+					y1: .6,
+					y2: .4
+				},
+				{
+					type: "line",
+					x1: .5,
+					x2: 1,
+					y1: .4,
+					y2: 1
+				}
+			)
 		},
 		"spc": {
 			title: "Space",
@@ -1313,19 +1696,55 @@ Unit.prototype.icons = function(icn) {
 		},
 		"spf": {
 			title: "Special Forces",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SF",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"sof": {
 			title: "Special Operations Forces Joint",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SOF",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"stp": {
 			title: "Special Troops",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "ST",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"spt": {
 			title: "Support",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SPT",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"sbs": {
 			title: "Surveillance (Battlefield Surveillance)",
@@ -1333,7 +1752,16 @@ Unit.prototype.icons = function(icn) {
 		},
 		"sus": {
 			title: "Sustainment",
-			type: "unit"
+			type: "unit",
+			fullFrame: true,
+			definition: new Array(
+				{
+					type: "text",
+					text: "SUST",
+					x: .5,
+					y: .6
+				}
+			)
 		},
 		"trs": {
 			title: "Transportation",
