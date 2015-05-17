@@ -1,0 +1,245 @@
+<html>
+	<head>
+		<style>
+			body {
+				font-family: sans-serif;
+				width: 1000px;
+			}
+			
+			svg {
+				width: 100%;
+				font-weight: normal;
+			}
+			
+			.container {
+				background: url("/img/canvas-background.png");
+				border: 1px solid black;
+				page-break-inside: avoid !important;
+				page-break-after: auto;
+			}
+			
+			table {
+				border-spacing: 0;
+				width: 100%;
+			}
+			
+			tr, td {
+				padding: 5px;
+				margin: 0;
+				vertical-align: top;
+				page-break-inside: avoid !important;
+				page-break-after: auto;
+			}
+			
+			.c1 {
+				background-color: #DDD;
+			}
+			
+			.c2 {
+				background-color: #CCC;
+			}
+			
+			.unit {
+				font-weight: bold;
+			}
+			
+			.unit td {
+				border-top: 1px solid black;
+			}
+			
+			th {
+				background-color: black;
+				color: white;
+				padding: 5px;
+			}
+			
+			td:first-child {
+				border-right: 1px solid black;
+				border-left: 1px solid black;
+			}
+			
+			td:last-child {
+				border-right: 1px solid black;
+			}
+		</style>
+		<script type="text/javascript" src="js/jQuery1.9.min.js"></script>
+		<script type="text/javascript" src="js/Unit.js"></script>
+		<script>
+			var U;
+			var $t;
+			
+			$(document).ready(function() {
+				U = new Unit();
+				$t = $("table");
+				var icons = U.icons();
+				var mod = U.modifiers();
+				var i = $("table").width() * .1;
+				var cl = "c1";
+				$.each(icons, function(k, v) {
+					if(k != "000") {
+						if(typeof v.definition !== "undefined") {
+							var f = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+							f.setAttribute("width", i);
+							f.setAttribute("height", i);
+							var h = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+							h.setAttribute("width", i);
+							h.setAttribute("height", i);
+							var n = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+							n.setAttribute("width", i);
+							n.setAttribute("height", i);
+							var u = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+							u.setAttribute("width", i);
+							u.setAttribute("height", i);
+							$t.append(
+								$("<tr>").attr("class", cl + " unit").append(
+									$("<td>").attr("width", "40%").text(v.title).append(
+										$("<a>").attr("name", k)
+									).append(
+										$("<div>").text(k).css({
+											"fontFamily": "monospace",
+											"backgroundColor": "#EEE",
+											"padding": "5px",
+											"marginRight": "20px",
+											"marginTop": "10px"
+										})
+									)
+								).append(
+									$("<td>").attr("width", i).append(
+										$("<div>").attr("class", "container").append(f)
+									)
+								).append(
+									$("<td>").attr("width", i).append(
+										$("<div>").attr("class", "container").append(h)
+									)
+								).append(
+									$("<td>").attr("width", i).append(
+										$("<div>").attr("class", "container").append(n)
+									)
+								).append(
+									$("<td>").attr("width", i).append(
+										$("<div>").attr("class", "container").append(u)
+									)
+								)
+							)
+							var o = {scale: .2};
+							U = new Unit("f", k, "sqd").settings(o).draw(f).center();
+							U = new Unit("h", k, "sqd").settings(o).draw(h).center();
+							U = new Unit("n", k, "sqd").settings(o).draw(n).center();
+							U = new Unit("u", k, "sqd").settings(o).draw(u).center();
+						} else {
+							$t.append(
+								$("<tr>").attr("class", cl + " unit").append(
+									$("<td>").text(v.title).append(
+										$("<a>").attr("name", k)
+									).append(
+										$("<div>").text(k).css({
+											"fontFamily": "monospace",
+											"backgroundColor": "#EEE",
+											"padding": "5px",
+											"marginRight": "20px",
+											"marginTop": "10px"
+										})
+									).css("color", "red")
+								).append(
+									$("<td>").attr("colspan", 4).text("No Definition Found!").css("color", "red")
+								)
+							);
+						}
+						// Add in modifiers
+						$.each(mod, function(km, vm) {
+							if(km != "000" && km != "001" && (
+								(typeof vm.modifies !== "undefined" && vm.modifies.indexOf(k) != -1) || (typeof vm.modifies === "undefined" && k == "inf"))
+							){
+								if(typeof vm.definition !== "undefined") {
+									var f = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+									f.setAttribute("width", i);
+									f.setAttribute("height", i);
+									var h = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+									h.setAttribute("width", i);
+									h.setAttribute("height", i);
+									var n = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+									n.setAttribute("width", i);
+									n.setAttribute("height", i);
+									var u = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+									u.setAttribute("width", i);
+									u.setAttribute("height", i);
+									$t.append(
+										$("<tr>").attr("class", cl).append(
+											$("<td>").attr("width", "400").text(vm.title).append(
+												$("<a>").attr("name", km)
+											).append(
+												$("<div>").text(km).css({
+													"fontFamily": "monospace",
+													"backgroundColor": "#EEE",
+													"padding": "5px",
+													"marginRight": "20px",
+													"marginTop": "10px"
+												})
+											)
+										).append(
+											$("<td>").attr("width", i).append(
+												$("<div>").attr("class", "container").append(f)
+											)
+										).append(
+											$("<td>").attr("width", i).append(
+												$("<div>").attr("class", "container").append(h)
+											)
+										).append(
+											$("<td>").attr("width", i).append(
+												$("<div>").attr("class", "container").append(n)
+											)
+										).append(
+											$("<td>").attr("width", i).append(
+												$("<div>").attr("class", "container").append(u)
+											)
+										)
+									)
+									var o = {scale: .25};
+									U = new Unit("f", k, "sqd").settings(o).modifier(km).draw(f).center();
+									U = new Unit("h", k, "sqd").settings(o).modifier(km).draw(h).center();
+									U = new Unit("n", k, "sqd").settings(o).modifier(km).draw(n).center();
+									U = new Unit("u", k, "sqd").settings(o).modifier(km).draw(u).center();
+								} else {
+									$t.append(
+										$("<tr>").attr("class", cl).append(
+											$("<td>").text(vm.title).append(
+												$("<a>").attr("name", km)
+											).append(
+												$("<div>").text(km).css({
+													"fontFamily": "monospace",
+													"backgroundColor": "#EEE",
+													"padding": "5px",
+													"marginRight": "20px",
+													"marginTop": "10px"
+												})
+											).css("color", "red")
+										).append(
+											$("<td>").attr("colspan", 4).text("No Definition Found!").css("color", "red")
+										)
+									);
+								}
+							}
+						});
+						if(cl == "c1") {
+							cl = "c2";
+						} else {
+							cl = "c1";
+						}
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Available Unit Icons</h1>
+		<table>
+			<tr>
+				<th>Description</th>
+				<th>Friend</th>
+				<th>Hostile</th>
+				<th>Neutral</th>
+				<th>Unknown</th>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -358,6 +358,8 @@ function unitControls() {
 	var $unitPanelOne;
 	var $unitPanelMany;
 	var selectedUnits;
+	var modifiers = new Array();
+	var $falseMods = $("<select>");
 	
 	$unitModal.on('shown.bs.modal', function(e) {
 		unitPreview.center();
@@ -413,8 +415,28 @@ function unitControls() {
 			} else {
 				$("<option>").attr("value", k).text(v.title).data("type", v.type).appendTo($echelon);
 			}
-			
 		});
+		// Set the modifiers
+		var modifiers = unitPreview.modifiers();
+		var $modifier1 = $unitModal.find("select.mod.mod1");
+		var $modifier2 = $unitModal.find("select.mod.mod2");
+		var $modifiers = $unitModal.find("select.mod");
+		$.each(modifiers, function(k, v) {
+			if(typeof v.definition === "undefined" && k != "000" && k != "001") {
+				var $o = $("<option>").attr({
+					value: k,
+					disabled: "disabled"
+				}).data("type", v.type).text(v.title).data("type", v.type);
+			} else {
+				var $o = $("<option>").attr("value", k).data("type", v.type).text(v.title).data("type", v.type);
+			}
+			if(v.type == 1) {
+				$o.appendTo($modifier1);
+			} else {
+				$o.appendTo($modifier2);
+			}
+		});
+		var $modifierOptions = $unitModal.find("select.mod option");
 		// Set reinforced/detached
 		var $refdet = $unitModal.find(".refdet");
 		// Set the countries
@@ -458,11 +480,29 @@ function unitControls() {
 		// Change the unit icon
 		$icon.change(function() {
 			unitPreview.icon($(this).val()).draw().center();
+			var val = $(this).val();
+			$modifierOptions.each(function() {
+				var e = $(this).attr("value");
+				if(typeof modifiers[e].modifies === "undefined" || modifiers[e].modifies.indexOf(val) != -1) {
+					if($(this).data("type") == 1) {
+						$(this).appendTo($modifier1);
+					} else {
+						$(this).appendTo($modifier2);
+					}
+				} else {
+					$(this).appendTo($falseMods);
+				}
+			});
+			$modifiers.change();
 		}).change();
 		// Change the unit echelon
 		$echelon.change(function() {
 			unitPreview.echelon($(this).val()).draw().center();
 		}).change();
+		// Change the modifiers
+		$modifiers.change(function() {
+			unitPreview.modifier($(this).val()).draw();
+		});
 		// Change reinforced/detached
 		$refdet.click(function() {
 			unitPreview.amplifiers({1: $(this).val()}).draw().center();
@@ -519,7 +559,7 @@ function unitControls() {
 			G.addSymbol(unitPreview);
 			G.removeSelectedSymbol();
 			// Create a new unit for the preview
-			unitPreview = new Unit($identity.val(), $icon.val(), $echelon.val()).draw($unitPreviewCanvas[0]);
+			unitPreview = new Unit($identity.val(), $icon.val(), $echelon.val()).modifier($modifier1.val()).modifier($modifier2.val()).draw($unitPreviewCanvas[0]);
 			// Reset the options
 			$refdet.eq(0).prop("checked", "checked");
 			$country.val("false");
